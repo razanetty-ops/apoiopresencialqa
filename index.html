@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Observação de Aula Profissional</title>
 
+<!-- Biblioteca para gerar PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
+/* ===== ESTILO GERAL ===== */
 body{
   font-family:Arial;
   background:#eef;
@@ -15,6 +17,7 @@ body{
   padding:20px;
 }
 
+/* Caixa principal */
 .container{
   max-width:900px;
   margin:auto;
@@ -23,14 +26,17 @@ body{
   border-radius:8px;
 }
 
+/* Títulos */
 h1,h2{color:#2c3e50}
 
+/* Layout dos inputs */
 .header-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
   gap:10px;
 }
 
+/* Campos */
 input,textarea{
   width:100%;
   padding:8px;
@@ -41,6 +47,7 @@ textarea{
   height:120px;
 }
 
+/* Botões principais */
 .btn-status{
   background:#e8f0fe;
   padding:10px;
@@ -49,10 +56,12 @@ textarea{
   border-radius:5px;
 }
 
+/* Botão ativo */
 .btn-status.active{
   background:#bcd4ff;
 }
 
+/* Opções de frases */
 .opcao{
   background:#f1f1f1;
   margin:5px 0;
@@ -61,10 +70,12 @@ textarea{
   border-radius:4px;
 }
 
+/* Hover */
 .opcao:hover{
   background:#ddd;
 }
 
+/* Botão PDF */
 button{
   margin-top:15px;
   padding:10px;
@@ -82,6 +93,7 @@ button{
 
 <h1>Relatório de Observação de Aula</h1>
 
+<!-- ===== CAMPOS DE IDENTIFICAÇÃO ===== -->
 <div class="header-grid">
 <input type="date" id="data">
 <input placeholder="Escola" id="escola">
@@ -90,18 +102,22 @@ button{
 <input placeholder="Turma" id="turma">
 </div>
 
+<!-- ===== ÁREA DE SELEÇÃO ===== -->
 <div id="area-selecao">
 
 <h2>Planejamento e Domínio: Objetivos da Aula</h2>
 
-<div class="btn-status" onclick="selecionarOpcao('explicito', this)">Explícito</div>
-<div class="btn-status" onclick="selecionarOpcao('implicito', this)">Implícito</div>
-<div class="btn-status" onclick="selecionarOpcao('nao', this)">Não Evidente</div>
+<!-- 🔥 ALTERADO: agora os botões não têm texto fixo -->
+<div class="btn-status" onclick="selecionarOpcao('explicito', this)" id="btn-explicito"></div>
+<div class="btn-status" onclick="selecionarOpcao('implicito', this)" id="btn-implicito"></div>
+<div class="btn-status" onclick="selecionarOpcao('nao', this)" id="btn-nao"></div>
 
+<!-- Lista dinâmica -->
 <div id="lista"></div>
 
 </div>
 
+<!-- ===== ÁREA DE TEXTO ===== -->
 <div>
 <h3>Registro</h3>
 <textarea id="texto"></textarea>
@@ -109,20 +125,35 @@ button{
 
 </div>
 
+<!-- Botão PDF -->
 <button onclick="gerarPDF()">Gerar PDF</button>
 
 <script>
 
-/* GARANTE CARREGAMENTO */
+/* ===============================
+   🔥 NOVO: EXECUTA AO CARREGAR
+================================= */
 document.addEventListener("DOMContentLoaded", () => {
+
+  // Preenche data automaticamente
   const campoData = document.getElementById('data');
   if(campoData) campoData.valueAsDate = new Date();
+
+  /* 🔥 NOVO: PREENCHE BOTÕES COM FRASE COMPLETA */
+  document.getElementById('btn-explicito').innerText = banco.explicito.titulo;
+  document.getElementById('btn-implicito').innerText = banco.implicito.titulo;
+  document.getElementById('btn-nao').innerText = banco.nao.titulo;
+
 });
 
-/* CONTROLE */
+/* ===============================
+   CONTROLE DE MENU (TOGGLE)
+================================= */
 let categoriaAtualAtiva = null;
 
-/* BANCO COMPLETO */
+/* ===============================
+   BANCO DE DADOS
+================================= */
 const banco = {
 
 explicito:{
@@ -163,17 +194,7 @@ frases:[
 "Professor conduziu a aula com progressão lógica do conteúdo.",
 "A prática em sala refletia o objetivo esperado, mesmo sem ser dito.",
 "As perguntas feitas pelo professor indicavam o caminho da aprendizagem.",
-"A correção das atividades evidenciou o objetivo da aula.",
-"O conteúdo trabalhado seguiu uma sequência coerente com o planejamento.",
-"As atividades propostas estavam diretamente relacionadas ao tema da aula.",
-"Houve consistência entre o início, desenvolvimento e fechamento da aula.",
-"Professor manteve foco no conteúdo, mesmo sem explicitar o objetivo.",
-"Os alunos conseguiram realizar as tarefas dentro do esperado.",
-"A explicação conduziu naturalmente à aprendizagem pretendida.",
-"As intervenções do docente indicavam domínio do conteúdo.",
-"A escolha dos exercícios evidenciou a intenção pedagógica.",
-"Houve alinhamento entre teoria e prática proposta.",
-"A organização da aula indicava claramente a aprendizagem esperada."
+"A correção das atividades evidenciou o objetivo da aula."
 ]
 },
 
@@ -189,28 +210,21 @@ frases:[
 "Houve dispersão no conteúdo sem foco definido.",
 "As atividades pareceram desconectadas entre si.",
 "Alunos demonstraram dúvidas sobre o que estavam aprendendo.",
-"Não houve direcionamento claro durante a aula.",
-"Professor não explicitou expectativas de aprendizagem.",
-"A aula ocorreu de forma improvisada, sem evidência de planejamento.",
-"Não houve relação entre explicação e atividade proposta.",
-"O conteúdo foi trabalhado sem contextualização.",
-"Professor não retomou conceitos ou objetivos em nenhum momento.",
-"As intervenções do docente não indicaram um foco claro.",
-"Alunos participaram, mas sem clareza do objetivo da atividade.",
-"Não houve orientação sobre o resultado esperado das tarefas.",
-"A aula terminou sem fechamento ou síntese.",
-"Não ficou evidente qual aprendizagem deveria ser construída."
+"Não houve direcionamento claro durante a aula."
 ]
 }
 
 };
 
-/* FUNÇÃO PRINCIPAL */
+/* ===============================
+   FUNÇÃO PRINCIPAL
+================================= */
 function selecionarOpcao(tipo, botao){
 
 const lista = document.getElementById('lista');
 const titulo = document.querySelector('#area-selecao h2');
 
+/* 🔥 TOGGLE (abre/fecha) */
 if(categoriaAtualAtiva === tipo){
   lista.innerHTML='';
   botao.classList.remove('active');
@@ -223,21 +237,24 @@ categoriaAtualAtiva=tipo;
 
 lista.innerHTML='';
 
+/* remove destaque dos outros */
 document.querySelectorAll('.btn-status')
 .forEach(el=>el.classList.remove('active'));
 
+/* destaca atual */
 botao.classList.add('active');
 
+/* 🔥 ALTERADO: título dinâmico */
 titulo.innerText=banco[tipo].titulo;
 
-/* FRASES */
+/* gera frases */
 banco[tipo].frases.forEach(frase=>{
 
   const div=document.createElement('div');
   div.className='opcao';
   div.innerText=frase;
 
-  /* 🔥 CORREÇÃO AQUI */
+  /* 🔥 CORREÇÃO IMPORTANTE */
   div.onclick = () => adicionarTexto(frase, div);
 
   lista.appendChild(div);
@@ -246,7 +263,9 @@ banco[tipo].frases.forEach(frase=>{
 
 }
 
-/* FUNÇÃO CORRIGIDA */
+/* ===============================
+   ADICIONAR TEXTO
+================================= */
 function adicionarTexto(frase, elemento){
 
 const campo=document.getElementById('texto');
@@ -271,7 +290,9 @@ if(!campo.value.includes(frase)){
 
 }
 
-/* PDF */
+/* ===============================
+   GERAR PDF
+================================= */
 function gerarPDF(){
 
 if(typeof html2pdf === "undefined"){
