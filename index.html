@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Observação de Aula Profissional</title>
+<style>
+body{font-family:Arial;background:#eef;margin:0}
+.container{width:90%;margin:auto;background:#fff;padding:20px}
+h1,h2{color:#2c3e50}
+.section{margin-bottom:25px}
+.question{border:1px solid #ccc;padding:10px;border-radius:8px;margin-top:10px}
+textarea{width:100%;height:100px;margin-top:10px}
+.hidden{display:none}
+.opcao{background:#e8f0fe;margin:5px;padding:10px;border-radius:6px;cursor:pointer;transition:0.2s}
+.opcao:hover{background:#d2e3fc}
+button{margin-top:10px;padding:10px;background:#2c3e50;color:#fff;border:none;border-radius:5px;cursor:pointer}
+.header input{display:block;width:100%;margin:5px 0;padding:6px}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>Observação de Aula</h1>
+
+<div class="header">
+<input type="date" id="data">
+<input placeholder="Escola" id="escola">
+<input placeholder="Professor" id="professor">
+<input placeholder="Componente" id="componente">
+<input placeholder="Turma" id="turma">
+</div>
+
+<div class="section">
+<h2>Planejamento e Domínio</h2>
+<p>Selecione a situação observada:</p>
+
+<div class="opcao" onclick="selecionarOpcao('explicito')">✅ Objetivo ficou explícito ao longo da aula</div>
+<div class="opcao" onclick="selecionarOpcao('implicito')">⚖️ Objetivo ficou implícito, mas houve coerência</div>
+<div class="opcao" onclick="selecionarOpcao('nao')">❌ Objetivo não ficou evidente</div>
+
+<div id="lista"></div>
+
+<div id="box" class="hidden">
+<h3>Justificativa selecionada</h3>
+<textarea id="texto"></textarea>
+
+<button onclick="mostrarSugestoes()">Ver 20 sugestões</button>
+<div id="sugestoes"></div>
+</div>
+</div>
+
+<script>
+const banco={
+explicito:[
+"Professor apresentou os objetivos no quadro no início da aula.",
+"Docente explicou claramente o que os alunos deveriam aprender antes de iniciar a atividade.",
+"Professor retomou o objetivo durante a explicação para reforçar o foco da aula.",
+"Durante a atividade, o professor questionou os alunos sobre o que estavam aprendendo.",
+"Ao final, o docente retomou o objetivo e validou se foi alcançado.",
+"Objetivos foram escritos no quadro e revisitados durante a aula.",
+"Professor relacionou cada atividade ao objetivo proposto.",
+"Alunos foram convidados a explicar com suas palavras o objetivo da aula.",
+"Professor contextualizou o conteúdo com situações práticas ligadas ao objetivo.",
+"Houve explicitação do para que aprender antes da execução das tarefas.",
+"Docente utilizou exemplos claros conectando a atividade ao objetivo.",
+"Professor fez síntese final retomando os objetivos trabalhados.",
+"Objetivo foi apresentado em slide e discutido com a turma.",
+"Professor deixou claro o que seria avaliado na aula.",
+"Durante correção, retomou o objetivo para consolidar a aprendizagem.",
+"Professor comparou o objetivo com o resultado das atividades realizadas.",
+"Objetivos foram apresentados em linguagem acessível aos alunos.",
+"Houve retomada do objetivo após dúvidas dos estudantes.",
+"Professor utilizou perguntas norteadoras alinhadas ao objetivo.",
+"A aula foi estruturada explicitamente em função do objetivo proposto."
+],
+implicito:[
+"As atividades estavam alinhadas ao conteúdo esperado, mesmo sem explicitação direta.",
+"Professor iniciou diretamente com exercícios coerentes com a aprendizagem proposta.",
+"A sequência didática indicava claramente o objetivo, embora não verbalizado.",
+"As intervenções do professor direcionavam para a aprendizagem esperada.",
+"Houve coerência entre explicação, atividade e correção.",
+"O tipo de exercício indicava o foco da aprendizagem.",
+"Professor conduziu a aula com progressão lógica do conteúdo.",
+"A prática em sala refletia o objetivo esperado, mesmo sem ser dito.",
+"As perguntas feitas pelo professor indicavam o caminho da aprendizagem.",
+"A correção das atividades evidenciou o objetivo da aula.",
+"O conteúdo trabalhado seguiu uma sequência coerente com o planejamento.",
+"As atividades propostas estavam diretamente relacionadas ao tema da aula.",
+"Houve consistência entre o início, desenvolvimento e fechamento da aula.",
+"Professor manteve foco no conteúdo, mesmo sem explicitar o objetivo.",
+"Os alunos conseguiram realizar as tarefas dentro do esperado.",
+"A explicação conduziu naturalmente à aprendizagem pretendida.",
+"As intervenções do docente indicavam domínio do conteúdo.",
+"A escolha dos exercícios evidenciou a intenção pedagógica.",
+"Houve alinhamento entre teoria e prática proposta.",
+"A organização da aula indicava claramente a aprendizagem esperada."
+],
+nao:[
+"Professor iniciou a aula sem apresentar o que seria aprendido.",
+"Não houve clareza sobre o propósito das atividades propostas.",
+"As atividades foram realizadas sem conexão aparente com um objetivo.",
+"Alunos executaram tarefas sem compreender sua finalidade.",
+"Não houve retomada ou síntese ao final da aula.",
+"Professor não explicou o porquê das atividades realizadas.",
+"Houve dispersão no conteúdo sem foco definido.",
+"As atividades pareceram desconectadas entre si.",
+"Alunos demonstraram dúvidas sobre o que estavam aprendendo.",
+"Não houve direcionamento claro durante a aula.",
+"Professor não explicitou expectativas de aprendizagem.",
+"A aula ocorreu de forma improvisada, sem evidência de planejamento.",
+"Não houve relação entre explicação e atividade proposta.",
+"O conteúdo foi trabalhado sem contextualização.",
+"Professor não retomou conceitos ou objetivos em nenhum momento.",
+"As intervenções do docente não indicaram um foco claro.",
+"Alunos participaram, mas sem clareza do objetivo da atividade.",
+"Não houve orientação sobre o resultado esperado das tarefas.",
+"A aula terminou sem fechamento ou síntese.",
+"Não ficou evidente qual aprendizagem deveria ser construída."
+]
+};
+
+function selecionarOpcao(tipo){
+const lista=document.getElementById('lista');
+lista.innerHTML='';
+
+banco[tipo].forEach(frase=>{
+const div=document.createElement('div');
+div.className='opcao';
+div.innerText=frase;
+
+div.onclick=()=>{
+document.querySelectorAll('#lista .opcao').forEach(el=>el.style.background='#e8f0fe');
+div.style.background='#bcd4ff';
+
+let campo = document.getElementById('texto');
+
+if(campo.value === ''){
+  campo.value = '- ' + frase;
+} else {
+  campo.value += '\n- ' + frase;
+}
+document.getElementById('box').classList.remove('hidden');
+
+document.getElementById('box').scrollIntoView({behavior:'smooth'});
+};
+
+lista.appendChild(div);
+});
+}
+
+function mostrarSugestoes(){
+const div=document.getElementById('sugestoes');
+div.innerHTML='';
+
+for(let i=1;i<=20;i++){
+let el=document.createElement('div');
+el.className='opcao';
+el.innerText='Sugestão complementar '+i;
+el.onclick=()=>document.getElementById('texto').value+= ' '+el.innerText;
+div.appendChild(el);
+}
+}
+</script>
+
+</body>
+</html>
