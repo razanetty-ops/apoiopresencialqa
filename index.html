@@ -1,98 +1,96 @@
 <script>
+document.addEventListener('DOMContentLoaded', () => {
 
-/* BANCO DE FRASES PRONTAS */
-const banco = {
+  /* BANCO DE FRASES PRONTAS */
+  const banco = {
+    explicito: [
+      "Professor apresentou os objetivos no quadro no início da aula.",
+      "Docente explicou claramente o que os alunos deveriam aprender antes de iniciar a atividade."
+    ],
+    implicito: [
+      "As atividades estavam alinhadas ao conteúdo esperado, mesmo sem explicitação direta.",
+      "Professor iniciou diretamente com exercícios coerentes com a aprendizagem proposta."
+    ],
+    nao: [
+      "Professor iniciou a aula sem apresentar o que seria aprendido.",
+      "Não houve clareza sobre o propósito das atividades propostas."
+    ]
+  };
 
-explicito:[
-"Professor apresentou os objetivos no quadro no início da aula.",
-"Docente explicou claramente o que os alunos deveriam aprender antes de iniciar a atividade."
-],
+  let opcaoAtual = null;
 
-implicito:[
-"As atividades estavam alinhadas ao conteúdo esperado, mesmo sem explicitação direta.",
-"Professor iniciou diretamente com exercícios coerentes com a aprendizagem proposta."
-],
+  /* FUNÇÃO PRINCIPAL */
+  window.selecionarOpcao = function(tipo) {
 
-nao:[
-"Professor iniciou a aula sem apresentar o que seria aprendido.",
-"Não houve clareza sobre o propósito das atividades propostas."
-]
+    const lista = document.getElementById('lista');
+    const box   = document.getElementById('box');
+    const texto = document.getElementById('texto');
 
-};
+    // ✅ Segurança extra
+    if (!lista || !box || !texto) {
+      console.error('Elementos do formulário não encontrados no HTML.');
+      return;
+    }
 
-/* 🔥 ALTERAÇÃO: variável para controlar menu aberto */
-let opcaoAtual = null;
+    // Fecha se clicar na mesma opção
+    if (opcaoAtual === tipo) {
+      lista.innerHTML = '';
+      box.classList.add('hidden');
+      opcaoAtual = null;
+      return;
+    }
 
-/* 🔥 ALTERAÇÃO: função única (removida duplicação) */
-function selecionarOpcao(tipo){
+    opcaoAtual = tipo;
+    lista.innerHTML = '';
 
-  const lista = document.getElementById('lista');
-  const box = document.getElementById('box');
+    banco[tipo].forEach(frase => {
 
-  /* 🔥 ALTERAÇÃO: se clicar novamente, FECHA */
-  if(opcaoAtual === tipo){
-    lista.innerHTML = '';           // limpa lista
-    box.classList.add('hidden');    // esconde caixa
-    opcaoAtual = null;              // reseta controle
-    return;                         // interrompe execução
-  }
+      const div = document.createElement('div');
+      div.className = 'opcao';
+      div.textContent = frase;
 
-  /* 🔥 ALTERAÇÃO: atualiza estado */
-  opcaoAtual = tipo;
+      div.addEventListener('click', () => {
 
-  // Limpa lista anterior
-  lista.innerHTML = '';
+        document
+          .querySelectorAll('#lista .opcao')
+          .forEach(el => el.style.background = '#e8f0fe');
 
-  // Carrega novas opções
-  banco[tipo].forEach(frase => {
+        div.style.background = '#bcd4ff';
 
-    const div = document.createElement('div');
-    div.className = 'opcao';
-    div.innerText = frase;
+        texto.value += (texto.value ? '\n' : '') + '- ' + frase;
 
-    div.onclick = () => {
+        box.classList.remove('hidden');
+        box.scrollIntoView({ behavior: 'smooth' });
+      });
 
-      document.querySelectorAll('#lista .opcao')
-      .forEach(el => el.style.background='#e8f0fe');
+      lista.appendChild(div);
+    });
+  };
 
-      div.style.background = '#bcd4ff';
+  /* FUNÇÃO DE SUGESTÕES EXTRAS */
+  window.mostrarSugestoes = function() {
 
-      let campo = document.getElementById('texto');
+    const div = document.getElementById('sugestoes');
+    const texto = document.getElementById('texto');
 
-      if(campo.value === ''){
-        campo.value = '- ' + frase;
-      } else {
-        campo.value += '\n- ' + frase;
-      }
+    if (!div || !texto) return;
 
-      box.classList.remove('hidden');
+    div.innerHTML = '';
 
-      box.scrollIntoView({behavior:'smooth'});
-    };
+    for (let i = 1; i <= 20; i++) {
 
-    lista.appendChild(div);
-  });
-}
+      const el = document.createElement('div');
+      el.className = 'opcao';
+      el.textContent = 'Sugestão complementar ' + i;
 
-/* FUNÇÃO PARA MOSTRAR SUGESTÕES EXTRAS */
-function mostrarSugestoes(){
+      el.addEventListener('click', () => {
+        texto.value += '\n- ' + el.textContent;
+      });
 
-  const div = document.getElementById('sugestoes');
-  div.innerHTML = '';
+      div.appendChild(el);
+    }
+  };
 
-  for(let i=1;i<=20;i++){
-
-    let el = document.createElement('div');
-
-    el.className = 'opcao';
-    el.innerText = 'Sugestão complementar ' + i;
-
-    el.onclick = () => {
-      document.getElementById('texto').value += ' ' + el.innerText;
-    };
-
-    div.appendChild(el);
-  }
-}
-
+});
 </script>
+``
