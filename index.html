@@ -3,13 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Observação de Aula Profissional</title>
+<title>Observação de Aula</title>
 
-<!-- Biblioteca para gerar PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-/* ===== ESTILO GERAL ===== */
 body{
   font-family:Arial;
   background:#eef;
@@ -17,7 +15,6 @@ body{
   padding:20px;
 }
 
-/* Caixa principal */
 .container{
   max-width:900px;
   margin:auto;
@@ -26,17 +23,18 @@ body{
   border-radius:8px;
 }
 
-/* Títulos */
 h1,h2{color:#2c3e50}
 
-/* Layout dos inputs */
+.section{
+  margin-bottom:25px;
+}
+
 .header-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
   gap:10px;
 }
 
-/* Campos */
 input,textarea{
   width:100%;
   padding:8px;
@@ -44,24 +42,22 @@ input,textarea{
 }
 
 textarea{
-  height:120px;
+  height:150px;
 }
 
-/* Botões principais */
 .btn-status{
   background:#e8f0fe;
   padding:10px;
-  margin:5px;
+  margin:5px 5px 5px 0;
+  display:inline-block;
   cursor:pointer;
   border-radius:5px;
 }
 
-/* Botão ativo */
 .btn-status.active{
   background:#bcd4ff;
 }
 
-/* Opções de frases */
 .opcao{
   background:#f1f1f1;
   margin:5px 0;
@@ -70,12 +66,10 @@ textarea{
   border-radius:4px;
 }
 
-/* Hover */
 .opcao:hover{
   background:#ddd;
 }
 
-/* Botão PDF */
 button{
   margin-top:15px;
   padding:10px;
@@ -93,7 +87,6 @@ button{
 
 <h1>Relatório de Observação de Aula</h1>
 
-<!-- ===== CAMPOS DE IDENTIFICAÇÃO ===== -->
 <div class="header-grid">
 <input type="date" id="data">
 <input placeholder="Escola" id="escola">
@@ -102,244 +95,162 @@ button{
 <input placeholder="Turma" id="turma">
 </div>
 
-<!-- ===== ÁREA DE SELEÇÃO ===== -->
-<div id="area-selecao">
+<div id="formulario"></div>
 
-<h2>Planejamento e Domínio: Objetivos da Aula</h2>
-
-<!-- 🔥 ALTERADO: agora os botões não têm texto fixo -->
-<div class="btn-status" onclick="selecionarOpcao('explicito', this)" id="btn-explicito"></div>
-<div class="btn-status" onclick="selecionarOpcao('implicito', this)" id="btn-implicito"></div>
-<div class="btn-status" onclick="selecionarOpcao('nao', this)" id="btn-nao"></div>
-
-<!-- Lista dinâmica -->
-<div id="lista"></div>
-
-</div>
-
-<!-- ===== ÁREA DE TEXTO ===== -->
 <div>
-<h3>Registro</h3>
+<h3>Registro Geral</h3>
 <textarea id="texto"></textarea>
 </div>
 
 </div>
 
-<!-- Botão PDF -->
 <button onclick="gerarPDF()">Gerar PDF</button>
 
 <script>
 
 /* ===============================
-   🔥 NOVO: EXECUTA AO CARREGAR
+   DADOS (PERGUNTAS)
 ================================= */
-document.addEventListener("DOMContentLoaded", () => {
 
-  // Preenche data automaticamente
-  const campoData = document.getElementById('data');
-  if(campoData) campoData.valueAsDate = new Date();
+const perguntas = [
 
-  /* 🔥 NOVO: PREENCHE BOTÕES COM FRASE COMPLETA */
-  document.getElementById('btn-explicito').innerText = banco.explicito.titulo;
-  document.getElementById('btn-implicito').innerText = banco.implicito.titulo;
-  document.getElementById('btn-nao').innerText = banco.nao.titulo;
+/* ===== PERGUNTA 1 ===== */
+{
+  titulo: "Planejamento e Domínio: Objetivos da Aula",
 
-});
+  banco: {
+    explicito:{
+      titulo:"Objetivo ficou explícito ao longo da aula",
+      frases:[
+        "Professor apresentou os objetivos no quadro no início da aula.",
+        "Docente explicou claramente o que os alunos deveriam aprender antes de iniciar a atividade."
+      ]
+    },
 
-/* ===============================
-   CONTROLE DE MENU (TOGGLE)
-================================= */
-let categoriaAtualAtiva = null;
+    implicito:{
+      titulo:"Objetivo ficou implícito, mas houve coerência",
+      frases:[
+        "As atividades estavam alinhadas ao conteúdo esperado, mesmo sem explicitação direta."
+      ]
+    },
 
-/* ===============================
-   BANCO DE DADOS
-================================= */
-const banco = {
-
-explicito:{
-titulo:"Objetivo ficou explícito ao longo da aula",
-frases:[
-"Professor apresentou os objetivos no quadro no início da aula.",
-"Docente explicou claramente o que os alunos deveriam aprender antes de iniciar a atividade.",
-"Professor retomou o objetivo durante a explicação para fortalecer o foco da aula.",
-"Ao final, o docente retomou o objetivo e validou o progresso.",
-"Durante a atividade, o professor questionou os alunos sobre o que estavam aprendendo.",
-"Objetivos foram escritos no quadro e revisitados durante a aula.",
-"Professor relacionou cada atividade ao objetivo proposto.",
-"Alunos foram convidados a explicar com suas palavras o objetivo da aula.",
-"Professor contextualizou o conteúdo com situações práticas ligadas ao objetivo.",
-"Houve explicitação do para que aprender antes da execução das tarefas.",
-"Docente utilizou exemplos claros conectando a atividade ao objetivo.",
-"Professor fez síntese final retomando os objetivos trabalhados.",
-"Objetivo foi apresentado em slide e discutido com a turma.",
-"Professor deixou claro o que seria avaliado na aula.",
-"Durante correção, retomou o objetivo para consolidar a aprendizagem.",
-"Professor comparou o objetivo com o resultado das atividades realizadas.",
-"Objetivos foram apresentados em linguagem acessível aos alunos.",
-"Houve retomada do objetivo após dúvidas dos estudantes.",
-"Professor utilizou perguntas norteadoras alinhadas ao objetivo.",
-"A aula foi estruturada explicitamente em função do objetivo proposto."
-]
+    nao:{
+      titulo:"Objetivo não ficou evidente",
+      frases:[
+        "Professor iniciou a aula sem apresentar o que seria aprendido."
+      ]
+    }
+  }
 },
 
-implicito:{
-titulo:"Objetivo ficou implícito, mas houve coerência",
-frases:[
-"As atividades estavam alinhadas ao conteúdo esperado, mesmo sem explicitação direta.",
-"Professor iniciou diretamente com atividades consistentes com a proposta de aprendizagem.",
-"A sequência didática indicava claramente o objetivo, embora não verbalizado.",
-"As intervenções do professor direcionavam para a aprendizagem esperada.",
-"Houve coerência entre explicação, atividade e correção.",
-"O tipo de exercício indicava o foco da aprendizagem.",
-"Professor conduziu a aula com progressão lógica do conteúdo.",
-"A prática em sala refletia o objetivo esperado, mesmo sem ser dito.",
-"As perguntas feitas pelo professor indicavam o caminho da aprendizagem.",
-"A correção das atividades evidenciou o objetivo da aula."
-]
-},
-
-nao:{
-titulo:"Objetivo não ficou evidente",
-frases:[
-"Professor iniciou a aula sem apresentar o que seria aprendido.",
-"Não houve clareza sobre o propósito das atividades propostas.",
-"As atividades foram realizadas sem conexão aparente com um objetivo.",
-"Alunos executaram tarefas sem compreender sua finalidade.",
-"Não houve retomada ou síntese ao final da aula.",
-"Professor não explicou o porquê das atividades realizadas.",
-"Houve dispersão no conteúdo sem foco definido.",
-"As atividades pareceram desconectadas entre si.",
-"Alunos demonstraram dúvidas sobre o que estavam aprendendo.",
-"Não houve direcionamento claro durante a aula."
-]
-}
-
-};
+/* ===== PERGUNTA 2 ===== */
 {
   titulo: "Uso de recursos pedagógicos",
 
   banco: {
 
-    alto: {
-      titulo: "Demonstrou domínio dos recursos, conectando com a metodologia e adaptando quando necessário.",
-      frases: [
-        "O professor utilizou recursos digitais de forma intencional, articulando-os às estratégias metodológicas e realizando adaptações conforme as necessidades da turma.",
-        "Demonstrou domínio no uso da lousa digital, integrando-a à explicação e ajustando a abordagem diante das dúvidas dos alunos.",
-        "Utilizou plataforma educacional de forma fluida, adaptando as atividades conforme o ritmo da turma.",
-        "O docente integrou materiais impressos e digitais de maneira coerente com os objetivos da aula.",
-        "Ao perceber dificuldades, adaptou o uso dos recursos para garantir melhor compreensão dos alunos.",
-        "Utilizou vídeos e simulações como apoio à explicação, contextualizando-os dentro da proposta pedagógica.",
-        "Demonstrou flexibilidade ao modificar a estratégia de uso dos recursos durante a aula.",
-        "Os recursos foram utilizados como suporte à aprendizagem, e não apenas como complemento.",
-        "Articulou diferentes recursos (quadro, slides, atividades impressas) de forma integrada.",
-        "Ajustou o uso da tecnologia diante de imprevistos técnicos sem prejuízo à aula.",
-        "Utilizou recursos variados para atender diferentes estilos de aprendizagem.",
-        "Promoveu o uso ativo dos recursos pelos alunos, incentivando participação.",
-        "Adaptou atividades digitais para torná-las mais acessíveis à turma.",
-        "Demonstrou segurança ao transitar entre diferentes ferramentas pedagógicas.",
-        "Utilizou os recursos para potencializar a compreensão de conceitos mais complexos.",
-        "Fez intervenções pedagógicas utilizando os recursos como apoio estratégico.",
-        "Planejou previamente o uso dos recursos e os utilizou de forma eficaz.",
-        "Conectou o uso das plataformas com os objetivos de aprendizagem.",
-        "Utilizou os recursos para diversificar a dinâmica da aula.",
-        "Demonstrou autonomia e criticidade na escolha e adaptação dos recursos."
+    alto:{
+      titulo:"Demonstrou domínio dos recursos, conectando com a metodologia e adaptando quando necessário",
+      frases:[
+        "O professor utilizou recursos digitais de forma intencional.",
+        "Demonstrou domínio no uso da lousa digital.",
+        "Adaptou o uso dos recursos conforme a necessidade da turma."
       ]
     },
 
-    medio: {
-      titulo: "Demonstrou domínio dos recursos, mas com dificuldade de adaptação.",
-      frases: [
-        "O professor demonstrou domínio técnico dos recursos, mas manteve a mesma abordagem mesmo diante de dificuldades dos alunos.",
-        "Utilizou adequadamente a plataforma, porém sem realizar ajustes conforme as necessidades da turma.",
-        "Demonstrou conhecimento dos recursos digitais, mas com pouca flexibilidade pedagógica.",
-        "Manteve o planejamento inicial mesmo quando a estratégia não se mostrou eficaz.",
-        "Utilizou os recursos de forma correta, porém sem explorar todo seu potencial pedagógico.",
-        "Não realizou adaptações nas atividades mesmo diante de dificuldades evidentes.",
-        "Houve domínio técnico, mas pouca intervenção pedagógica mediada pelos recursos.",
-        "O uso dos recursos foi adequado, porém pouco sensível ao ritmo da turma.",
-        "Seguiu o roteiro planejado sem considerar as respostas dos alunos.",
-        "Demonstrou segurança no uso das ferramentas, mas sem ajustes metodológicos.",
-        "Utilizou materiais digitais e impressos sem diferenciação pedagógica.",
-        "As atividades foram conduzidas conforme o planejado, mesmo com necessidade de adaptação.",
-        "Houve pouca variação no uso dos recursos diante de dificuldades.",
-        "O professor não explorou alternativas disponíveis nos recursos utilizados.",
-        "Manteve o uso dos recursos de forma padronizada ao longo da aula.",
-        "Demonstrou domínio operacional, mas não pedagógico dos recursos.",
-        "Não houve personalização das atividades mediadas por tecnologia.",
-        "As intervenções foram limitadas ao uso previsto inicialmente.",
-        "O uso dos recursos não acompanhou as necessidades emergentes da turma.",
-        "Faltou flexibilidade na condução das atividades com os recursos disponíveis."
+    medio:{
+      titulo:"Demonstrou domínio dos recursos, mas com dificuldade de adaptação",
+      frases:[
+        "Utilizou adequadamente a plataforma, porém sem ajustes.",
+        "Manteve o planejamento mesmo com dificuldades dos alunos."
       ]
     },
 
-    baixo: {
-      titulo: "Uso mecanizado ou desconectado do objetivo de aprendizagem.",
-      frases: [
-        "O professor utilizou recursos digitais sem conexão clara com o objetivo da aula.",
-        "O uso da tecnologia ocorreu de forma mecânica, sem intencionalidade pedagógica.",
-        "Os recursos foram utilizados apenas como apoio visual, sem aprofundamento conceitual.",
-        "Houve uso de materiais sem relação direta com a aprendizagem proposta.",
-        "Os alunos interagiram com a plataforma sem compreender o propósito da atividade.",
-        "O docente utilizou recursos de forma repetitiva e pouco significativa.",
-        "Não houve articulação entre o recurso utilizado e o conteúdo trabalhado.",
-        "O uso dos recursos não contribuiu para a compreensão dos alunos.",
-        "As atividades digitais foram aplicadas sem mediação pedagógica.",
-        "O professor demonstrou dificuldade em utilizar os recursos de forma eficaz.",
-        "Houve dependência excessiva do recurso, sem intervenção docente qualificada.",
-        "O uso dos recursos não considerou o nível da turma.",
-        "As ferramentas foram utilizadas de forma desconectada da proposta da aula.",
-        "Não houve explicação sobre o uso ou finalidade dos recursos.",
-        "Os alunos utilizaram os recursos de forma passiva.",
-        "O recurso foi utilizado como fim, e não como meio para aprendizagem.",
-        "Não houve integração entre recursos e estratégias pedagógicas.",
-        "O uso dos materiais não favoreceu o desenvolvimento das habilidades previstas.",
-        "O professor não conseguiu mediar o uso dos recursos de forma significativa.",
-        "A utilização dos recursos não contribuiu para o avanço da aprendizagem."
+    baixo:{
+      titulo:"Uso mecanizado ou desconectado do objetivo de aprendizagem",
+      frases:[
+        "Utilizou recursos sem conexão com o objetivo.",
+        "Uso da tecnologia sem intencionalidade pedagógica."
       ]
     }
 
   }
 }
 
+];
+
+
 /* ===============================
-   FUNÇÃO PRINCIPAL
+   CONTROLE
 ================================= */
-function selecionarOpcao(tipo, botao){
 
-const lista = document.getElementById('lista');
-const titulo = document.querySelector('#area-selecao h2');
+let estado = {};
 
-/* 🔥 TOGGLE (abre/fecha) */
-if(categoriaAtualAtiva === tipo){
-  lista.innerHTML='';
+/* ===============================
+   GERAR FORMULÁRIO
+================================= */
+
+function gerarFormulario(){
+
+const container = document.getElementById('formulario');
+
+perguntas.forEach((pergunta, index)=>{
+
+  const div = document.createElement('div');
+  div.className = 'section';
+
+  div.innerHTML = `
+    <h2>${pergunta.titulo}</h2>
+
+    ${Object.keys(pergunta.banco).map(tipo => `
+      <div class="btn-status" onclick="selecionarOpcao(${index}, '${tipo}', this)">
+        ${pergunta.banco[tipo].titulo}
+      </div>
+    `).join('')}
+
+    <div id="lista-${index}"></div>
+  `;
+
+  container.appendChild(div);
+
+});
+
+}
+
+/* ===============================
+   SELEÇÃO (TOGGLE)
+================================= */
+
+function selecionarOpcao(indice, tipo, botao){
+
+const lista = document.getElementById(`lista-${indice}`);
+const bancoAtual = perguntas[indice].banco;
+
+/* TOGGLE */
+if(estado[indice] === tipo){
+  lista.innerHTML = '';
   botao.classList.remove('active');
-  categoriaAtualAtiva=null;
-  titulo.innerText="Planejamento e Domínio: Objetivos da Aula";
+  estado[indice] = null;
   return;
 }
 
-categoriaAtualAtiva=tipo;
+estado[indice] = tipo;
 
-lista.innerHTML='';
+lista.innerHTML = '';
 
-/* remove destaque dos outros */
-document.querySelectorAll('.btn-status')
-.forEach(el=>el.classList.remove('active'));
+/* limpa botões da mesma seção */
+botao.parentElement.querySelectorAll('.btn-status')
+.forEach(el => el.classList.remove('active'));
 
-/* destaca atual */
 botao.classList.add('active');
 
-/* 🔥 ALTERADO: título dinâmico */
-titulo.innerText=banco[tipo].titulo;
+/* FRASES */
+bancoAtual[tipo].frases.forEach(frase => {
 
-/* gera frases */
-banco[tipo].frases.forEach(frase=>{
+  const div = document.createElement('div');
+  div.className = 'opcao';
+  div.innerText = frase;
 
-  const div=document.createElement('div');
-  div.className='opcao';
-  div.innerText=frase;
-
-  /* 🔥 CORREÇÃO IMPORTANTE */
   div.onclick = () => adicionarTexto(frase, div);
 
   lista.appendChild(div);
@@ -351,45 +262,53 @@ banco[tipo].frases.forEach(frase=>{
 /* ===============================
    ADICIONAR TEXTO
 ================================= */
+
 function adicionarTexto(frase, elemento){
 
-const campo=document.getElementById('texto');
+const campo = document.getElementById('texto');
 
 if(!campo.value.includes(frase)){
 
-  if(campo.value===''){
-    campo.value='• '+frase;
+  if(campo.value === ''){
+    campo.value = '• ' + frase;
   }else{
-    campo.value+='\n• '+frase;
+    campo.value += '\n• ' + frase;
   }
 
-  /* feedback visual */
-  if(elemento){
-    elemento.style.background='#d4edda';
+  elemento.style.background = '#d4edda';
 
-    setTimeout(()=>{
-      elemento.style.background='#f1f1f1';
-    },300);
-  }
+  setTimeout(()=>{
+    elemento.style.background = '#f1f1f1';
+  },300);
 }
 
 }
 
 /* ===============================
-   GERAR PDF
+   PDF
 ================================= */
+
 function gerarPDF(){
 
 if(typeof html2pdf === "undefined"){
-  alert("Biblioteca PDF não carregada");
+  alert("Erro ao carregar PDF");
   return;
 }
 
-const elemento=document.getElementById('conteudo-relatorio');
+const elemento = document.getElementById('conteudo-relatorio');
 
 html2pdf().from(elemento).save();
 
 }
+
+/* ===============================
+   INICIAR
+================================= */
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.getElementById('data').valueAsDate = new Date();
+  gerarFormulario();
+});
 
 </script>
 
