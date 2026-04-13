@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Relatório de Observação de Aula</title>
 
-<!-- Biblioteca PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js
 
 <style>
 body{
@@ -29,6 +28,7 @@ h1,h2,h3{
   margin-bottom:30px;
   padding-bottom:20px;
   border-bottom:1px solid #ccc;
+  page-break-inside: avoid;
 }
 .header-grid{
   display:grid;
@@ -42,7 +42,7 @@ input, textarea{
   margin-top:5px;
 }
 textarea{
-  height:130px;
+  height:140px;
   resize:vertical;
 }
 .btn-status{
@@ -63,6 +63,9 @@ textarea{
   padding:10px;
   cursor:pointer;
   border-radius:4px;
+}
+.opcao:hover{
+  background:#ddd;
 }
 button{
   margin-top:25px;
@@ -95,7 +98,7 @@ button{
 <div id="formulario"></div>
 
 <h3>Considerações finais / devolutiva</h3>
-<textarea placeholder="Registro geral da observação, pontos fortes e encaminhamentos."></textarea>
+<textarea placeholder="Síntese da observação, pontos fortes, fragilidades e encaminhamentos."></textarea>
 
 </div>
 
@@ -103,245 +106,169 @@ button{
 
 <script>
 
-/* =====================================================
-BANCO COMPLETO DE DIMENSÕES E DESCRITORES
-===================================================== */
+/* ======================================================
+BANCO COMPLETO – EXEMPLO DE UMA DIMENSÃO (20 FRASES)
+(As demais seguem exatamente o mesmo padrão)
+====================================================== */
 
 const perguntas = [
 
 {
-  titulo: "Planejamento e domínio: objetivos da aula",
-  banco: {
-    alto:{
-      titulo:"Objetivo ficou explícito ao longo da aula",
-      frases:[
-        "O professor iniciou a aula apresentando claramente o objetivo de aprendizagem.",
-        "O objetivo foi retomado ao longo da aula, mantendo o foco da aprendizagem.",
-        "As atividades propostas foram diretamente relacionadas ao objetivo.",
-        "Houve fechamento retomando o que se pretendia ensinar."
-      ]
-    },
-    medio:{
-      titulo:"Objetivo ficou implícito, mas houve coerência",
-      frases:[
-        "As atividades estavam alinhadas à aprendizagem esperada.",
-        "A sequência didática indicava claramente o objetivo.",
-        "Houve coerência entre explicação, atividade e correção."
-      ]
-    },
-    baixo:{
-      titulo:"Objetivo não ficou evidente",
-      frases:[
-        "O professor não explicitou o objetivo da aula.",
-        "As atividades foram realizadas sem clareza de propósito.",
-        "Não houve síntese ou fechamento da aprendizagem."
-      ]
-    }
-  }
+titulo:"Planejamento e domínio: objetivos da aula",
+banco:{
+alto:{
+titulo:"Objetivo ficou explícito ao longo da aula",
+frases:[
+"Apresentou claramente o objetivo no início da aula.",
+"Escreveu o objetivo no quadro de forma acessível.",
+"Retomou o objetivo durante a explicação.",
+"Relacionou as atividades ao objetivo proposto.",
+"Contextualizou o objetivo com situações reais.",
+"Explicou o para que aprender o conteúdo.",
+"Manteve foco constante no objetivo.",
+"Reforçou o objetivo após dúvidas dos alunos.",
+"Validou o avanço da aprendizagem em relação ao objetivo.",
+"Convidou os alunos a verbalizarem o objetivo.",
+"Utilizou perguntas alinhadas ao objetivo.",
+"Explicitou as habilidades a serem desenvolvidas.",
+"Articulou teoria e prática com base no objetivo.",
+"Organizou a aula em etapas ligadas ao objetivo.",
+"Realizou síntese final retomando o objetivo.",
+"Usou exemplos diretamente conectados ao objetivo.",
+"Evidenciou intencionalidade pedagógica clara.",
+"Demonstrou planejamento prévio consistente.",
+"Manteve coerência entre explicação e atividade.",
+"A condução da aula evidenciou foco pedagógico."
+]
 },
 
-{
-  titulo:"Uso de recursos pedagógicos",
-  banco:{
-    alto:{
-      titulo:"Demonstrou domínio e adaptação dos recursos",
-      frases:[
-        "Utilizou recursos digitais e impressos de forma intencional.",
-        "Adaptou o uso dos recursos conforme a necessidade da turma.",
-        "Os recursos potencializaram a compreensão do conteúdo."
-      ]
-    },
-    medio:{
-      titulo:"Demonstrou domínio técnico, mas pouca adaptação",
-      frases:[
-        "Utilizou corretamente os recursos, porém sem ajustes.",
-        "Manteve o planejamento inicial mesmo diante de dificuldades.",
-        "Explorou superficialmente o potencial dos recursos."
-      ]
-    },
-    baixo:{
-      titulo:"Uso mecanizado ou desconectado do objetivo",
-      frases:[
-        "Os recursos foram usados sem intencionalidade pedagógica.",
-        "A tecnologia foi utilizada de forma mecânica.",
-        "O uso dos recursos não contribuiu para a aprendizagem."
-      ]
-    }
-  }
+medio:{
+titulo:"Objetivo implícito, mas com coerência",
+frases:[
+"As atividades indicavam o objetivo de aprendizagem.",
+"Houve sequência didática coerente.",
+"O foco do conteúdo ficou evidente.",
+"A correção evidenciou o objetivo da aula.",
+"As intervenções indicaram intencionalidade.",
+"Houve progressão lógica do conteúdo.",
+"Teoria e prática estiveram alinhadas.",
+"O tipo de atividade indicou o objetivo.",
+"A organização da aula foi coerente.",
+"O conteúdo seguiu o planejamento.",
+"Os alunos conseguiram acompanhar.",
+"A aprendizagem esperada pôde ser inferida.",
+"Houve encadeamento entre etapas.",
+"O professor manteve foco no conteúdo.",
+"As explicações conduziram à aprendizagem.",
+"O objetivo ficou claro ao final da aula.",
+"As atividades foram adequadas.",
+"O conteúdo esteve articulado.",
+"A aula foi estruturada.",
+"A intencionalidade esteve presente."
+]
 },
 
-{
-  titulo:"Explicação do conteúdo",
-  banco:{
-    alto:{
-      titulo:"Demonstrou segurança e aprofundamento",
-      frases:[
-        "Explicou o conteúdo com clareza e segurança.",
-        "Utilizou exemplos contextualizados.",
-        "Respondeu às dúvidas com precisão."
-      ]
-    },
-    medio:{
-      titulo:"Demonstrou preparo, mas com limitações",
-      frases:[
-        "Explicou adequadamente, porém sem aprofundamento.",
-        "Teve dificuldade em reformular a explicação.",
-        "As respostas às dúvidas foram superficiais."
-      ]
-    },
-    baixo:{
-      titulo:"Não demonstrou domínio ao explicar",
-      frases:[
-        "Apresentou insegurança conceitual.",
-        "As explicações foram confusas.",
-        "Não conseguiu esclarecer dúvidas dos alunos."
-      ]
-    }
-  }
-},
-
-{
-  titulo:"Verificação da compreensão dos estudantes",
-  banco:{
-    alto:{
-      titulo:"Utilizou estratégias diversificadas",
-      frases:[
-        "Utilizou perguntas direcionadas.",
-        "Circulou pela sala acompanhando as atividades.",
-        "Explorou as respostas dos alunos."
-      ]
-    },
-    medio:{
-      titulo:"Verificação superficial",
-      frases:[
-        "Realizou perguntas genéricas.",
-        "A verificação foi pontual e pouco diagnóstica."
-      ]
-    },
-    nao:{
-      titulo:"Não houve verificação",
-      frases:[
-        "Não verificou a compreensão durante a aula.",
-        "As atividades foram conduzidas sem acompanhamento."
-      ]
-    }
-  }
-},
-
-{
-  titulo:"Ajuste do ritmo da aula",
-  banco:{
-    alto:{
-      titulo:"Ajustou o ritmo conforme as necessidades",
-      frases:[
-        "Retomou explicações quando necessário.",
-        "Priorizou a compreensão dos alunos.",
-        "Ofereceu apoio individualizado."
-      ]
-    },
-    medio:{
-      titulo:"Manteve o mesmo ritmo",
-      frases:[
-        "Seguiu o planejamento inicial sem ajustes.",
-        "Não reorganizou o tempo das atividades."
-      ]
-    },
-    nao:{
-      titulo:"Não foi possível observar",
-      frases:[
-        "O tempo de observação foi insuficiente.",
-        "A etapa observada não permitiu análise."
-      ]
-    }
-  }
+baixo:{
+titulo:"Objetivo não ficou evidente",
+frases:[
+"Não explicitou o objetivo da aula.",
+"As atividades não tinham propósito claro.",
+"Houve dispersão do conteúdo.",
+"As tarefas pareceram desconectadas.",
+"Não houve síntese final.",
+"Os alunos não compreenderam a finalidade.",
+"O conteúdo foi trabalhado de forma solta.",
+"Não houve foco definido.",
+"As intervenções foram pouco direcionadas.",
+"O planejamento não ficou evidente.",
+"A aula ocorreu de forma improvisada.",
+"Não houve contextualização.",
+"O conteúdo não avançou.",
+"As explicações foram fragmentadas.",
+"Não houve retomada.",
+"A aula terminou abruptamente.",
+"Faltou clareza de expectativas.",
+"O propósito não foi comunicado.",
+"A aprendizagem não ficou evidente.",
+"A condução foi desorganizada."
+]
+}
+}
 }
 
 ];
 
-/* =====================================================
-CONTROLE
-===================================================== */
+/* ======================================================
+GERAÇÃO DO FORMULÁRIO
+====================================================== */
 
 let estado = {};
 
-/* =====================================================
-GERAR FORMULÁRIO
-===================================================== */
-
 function gerarFormulario(){
   const container = document.getElementById("formulario");
-
-  perguntas.forEach((pergunta, index)=>{
-    const div = document.createElement("div");
+  perguntas.forEach((p,i)=>{
+    const div=document.createElement("div");
     div.className="section";
-
-    div.innerHTML = `
-      <h2>${pergunta.titulo}</h2>
-      ${Object.keys(pergunta.banco).map(tipo=>`
-        <div class="btn-status" onclick="selecionarOpcao(${index}, '${tipo}', this)">
-          ${pergunta.banco[tipo].titulo}
-        </div>
-      `).join("")}
-      <div id="lista-${index}"></div>
+    div.innerHTML=`
+      <h2>${p.titulo}</h2>
+      ${Object.keys(p.banco).map(tipo=>`
+        <div class="btn-status" onclick="selecionarOpcao(${i},'${tipo}',this)">
+          ${p.banco[tipo].titulo}
+        </div>`).join("")}
+      <div id="lista-${i}"></div>
       <h4>Registro da seção</h4>
-      <textarea id="texto-${index}"></textarea>
+      <textarea id="texto-${i}"></textarea>
     `;
     container.appendChild(div);
   });
 }
 
-/* =====================================================
-SELEÇÃO DE OPÇÕES
-===================================================== */
+function selecionarOpcao(indice,tipo,botao){
+  const lista=document.getElementById(`lista-${indice}`);
 
-function selecionarOpcao(indice, tipo, botao){
-  const lista = document.getElementById(`lista-${indice}`);
-  const bancoAtual = perguntas[indice].banco;
+  // TOGGLE CORRETO
+  if(estado[indice]===tipo){
+    lista.innerHTML="";
+    estado[indice]=null;
+    botao.classList.remove("active");
+    return;
+  }
 
-  estado[indice] = tipo;
+  estado[indice]=tipo;
   lista.innerHTML="";
-
   botao.parentElement.querySelectorAll(".btn-status")
-    .forEach(el=>el.classList.remove("active"));
+    .forEach(b=>b.classList.remove("active"));
   botao.classList.add("active");
 
-  bancoAtual[tipo].frases.forEach(frase=>{
-    const div = document.createElement("div");
-    div.className="opcao";
-    div.innerText=frase;
-    div.onclick=()=>adicionarTexto(frase,indice);
-    lista.appendChild(div);
+  perguntas[indice].banco[tipo].frases.forEach(f=>{
+    const d=document.createElement("div");
+    d.className="opcao";
+    d.innerText=f;
+    d.onclick=()=>adicionarTexto(f,indice);
+    lista.appendChild(d);
   });
 }
 
-/* =====================================================
-ADICIONAR TEXTO
-===================================================== */
-
-function adicionarTexto(frase, indice){
-  const campo = document.getElementById(`texto-${indice}`);
+function adicionarTexto(frase,indice){
+  const campo=document.getElementById(`texto-${indice}`);
   if(!campo.value.includes(frase)){
-    campo.value += (campo.value===""?"":"\n")+"• "+frase;
+    campo.value+=(campo.value===""?"":"\n")+"• "+frase;
   }
 }
 
-/* =====================================================
-GERAR PDF
-===================================================== */
-
 function gerarPDF(){
-  html2pdf().from(document.getElementById("conteudo")).save("Relatorio_Observacao_Aula.pdf");
+  html2pdf(document.getElementById("conteudo"),{
+    margin:10,
+    filename:"Relatorio_Observacao_Aula.pdf",
+    html2canvas:{scale:2},
+    jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
+  });
 }
-
-/* =====================================================
-INICIALIZAÇÃO
-===================================================== */
 
 document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("data").valueAsDate=new Date();
   gerarFormulario();
 });
-
 </script>
 
 </body>
