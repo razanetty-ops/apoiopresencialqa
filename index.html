@@ -1,96 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Observação de Aula Profissional</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --bg-color: #eef2f5;
+            --box-bg: #ffffff;
+            --btn-hover: #34495e;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg-color); 
+            margin: 0; 
+            padding: 20px;
+            color: #333;
+        }
+
+        .container { 
+            width: 100%;
+            max-width: 900px; 
+            margin: auto; 
+            background: var(--box-bg); 
+            padding: 30px; 
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 { color: var(--primary); }
+        h1 { text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+
+        .header-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input, textarea { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        textarea { 
+            height: 150px; 
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .section { margin-bottom: 25px; }
+
+        .btn-status {
+            display: inline-block;
+            background: #e8f0fe;
+            margin: 5px;
+            padding: 12px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #cce0ff;
+            font-weight: 500;
+        }
+
+        .btn-status:hover, .btn-status.active { 
+            background: #bcd4ff; 
+            border-color: #99c2ff;
+        }
+
+        .opcao { 
+            background: #f8f9fa; 
+            margin: 8px 0; 
+            padding: 12px; 
+            border-left: 4px solid var(--primary);
+            border-radius: 4px; 
+            cursor: pointer; 
+            transition: 0.2s;
+            font-size: 0.95em;
+        }
+
+        .opcao:hover { background: #e2e6ea; }
+
+        .hidden { display: none; }
+
+        .action-btn { 
+            margin-top: 15px; 
+            padding: 12px 20px; 
+            background: var(--primary); 
+            color: #fff; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 1em;
+            font-weight: bold;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        .action-btn:hover { background: var(--btn-hover); }
+        
+        .btn-pdf {
+            background: #27ae60;
+        }
+        .btn-pdf:hover {
+            background: #219653;
+        }
+
+        /* Ocultar elementos na hora de gerar o PDF */
+        .no-print { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="conteudo-relatorio">
+    <h1>Relatório de Observação de Aula</h1>
+    
+    <div class="header-grid">
+        <div class="input-group">
+            <label for="data">Data da Observação</label>
+            <input type="date" id="data">
+        </div>
+        <div class="input-group">
+            <label for="escola">Unidade Escolar</label>
+            <input type="text" placeholder="Nome da Escola" id="escola">
+        </div>
+        <div class="input-group">
+            <label for="professor">Professor(a)</label>
+            <input type="text" placeholder="Nome do(a) Docente" id="professor">
+        </div>
+        <div class="input-group">
+            <label for="componente">Componente Curricular</label>
+            <input type="text" placeholder="Ex: Matemática, História" id="componente">
+        </div>
+        <div class="input-group">
+            <label for="turma">Turma/Ano</label>
+            <input type="text" placeholder="Ex: 1ª Série A" id="turma">
+        </div>
+    </div>
+
+    <div class="section no-print" id="area-selecao">
+        <h2>Planejamento e Domínio: Objetivos da Aula</h2>
+        <p>Selecione a situação observada para visualizar as evidências:</p>
+        
+        <div class="btn-status" onclick="selecionarOpcao('explicito', this)">✅ Objetivo Explícito</div>
+        <div class="btn-status" onclick="selecionarOpcao('implicito', this)">⚖️ Objetivo Implícito</div>
+        <div class="btn-status" onclick="selecionarOpcao('nao', this)">❌ Não Evidente</div>
+        
+        <div id="lista" style="margin-top: 15px;"></div>
+    </div>
+
+    <div id="box" class="section">
+        <h3>Registro de Evidências e Justificativas</h3>
+        <textarea id="texto" placeholder="As evidências selecionadas aparecerão aqui. Você também pode digitar observações adicionais..."></textarea>
+    </div>
+</div>
+
+<div class="container" style="margin-top: 20px; text-align: center; background: transparent; box-shadow: none;">
+    <button class="action-btn btn-pdf no-print" onclick="gerarPDF()">📄 Gerar PDF do Relatório</button>
+</div>
+
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+    // Configura a data atual automaticamente no campo de data
+    document.getElementById('data').valueAsDate = new Date();
 
-  /* BANCO DE FRASES PRONTAS */
-  const banco = {
-    explicito: [
-      "Professor apresentou os objetivos no quadro no início da aula.",
-      "Docente explicou claramente o que os alunos deveriam aprender antes de iniciar a atividade."
-    ],
-    implicito: [
-      "As atividades estavam alinhadas ao conteúdo esperado, mesmo sem explicitação direta.",
-      "Professor iniciou diretamente com exercícios coerentes com a aprendizagem proposta."
-    ],
-    nao: [
-      "Professor iniciou a aula sem apresentar o que seria aprendido.",
-      "Não houve clareza sobre o propósito das atividades propostas."
-    ]
-  };
+    const banco = {
+        explicito: [
+            "Professor apresentou os objetivos no quadro no início da aula.",
+            "Docente explicou claramente o que os alunos deveriam aprender antes de iniciar a atividade.",
+            "Professor retomou o objetivo durante a explicação para fortalecer o foco da aula.",
+            "Durante a atividade, o professor questionou os alunos sobre o que estavam aprendendo.",
+            "Ao final, o docente retomou o objetivo e validou o progresso.",
+            "Objetivos foram escritos no quadro e revisitados durante a aula.",
+            "Professor relacionou cada atividade ao objetivo proposto.",
+            "Alunos foram convidados a explicar com suas palavras o objetivo da aula.",
+            "Professor contextualizou o conteúdo com situações práticas ligadas ao objetivo.",
+            "Houve explicitação do 'para que aprender' antes da execução das tarefas.",
+            "Docente utilizou exemplos claros conectando a atividade ao objetivo.",
+            "Professor fez síntese final retomando os objetivos trabalhados.",
+            "Objetivo foi apresentado em slide e discutido com a turma.",
+            "Professor deixou claro o que seria avaliado na aula.",
+            "Durante a correção, retomou o objetivo para consolidar a aprendizagem.",
+            "Professor comparou o objetivo com o resultado das atividades realizadas.",
+            "Objetivos foram apresentados em linguagem acessível aos alunos.",
+            "Houve retomada do objetivo após dúvidas dos estudantes.",
+            "Professor utilizou perguntas norteadoras alinhadas ao objetivo.",
+            "A aula foi estruturada explicitamente em função do objetivo proposto."
+        ],
+        implicito: [
+            "As atividades estavam alinhadas ao conteúdo esperado, mesmo sem explicitação direta.",
+            "Professor iniciou diretamente com atividades consistentes com a proposta de aprendizagem.",
+            "A sequência didática indicava claramente o objetivo, embora não verbalizado.",
+            "As orientações do professor direcionavam para a aprendizagem esperada.",
+            "Houve coerência entre explicação, atividade e correção.",
+            "O tipo de exercício indicava o foco da aprendizagem.",
+            "Professor conduziu a aula com progressão lógica do conteúdo.",
+            "A prática em sala refletia o objetivo esperado, mesmo sem ser dito.",
+            "As perguntas feitas pelo professor indicavam o caminho da aprendizagem.",
+            "A correção das atividades evidenciou o objetivo da aula.",
+            "O conteúdo trabalhado manteve uma sequência consistente com o planejamento.",
+            "As atividades propostas foram diretamente relacionadas ao tema da aula.",
+            "Houve consistência entre o início, desenvolvimento e fechamento da aula.",
+            "Professor manteve foco no conteúdo, mesmo sem explicitar o objetivo.",
+            "Os alunos conseguiram realizar as tarefas dentro do esperado.",
+            "A explicação convergiu naturalmente para a aprendizagem pretendida.",
+            "As intervenções do docente indicavam o domínio do conteúdo.",
+            "A escolha dos exercícios evidenciou a intenção pedagógica.",
+            "Houve alinhamento entre teoria e prática proposta.",
+            "A organização da aula indicava claramente a aprendizagem esperada."
+        ],
+        nao: [
+            "Professor iniciou a aula sem apresentar o que seria aprendido.",
+            "Não houve clareza sobre o propósito das atividades propostas.",
+            "As atividades foram realizadas sem conexão aparente com um objetivo.",
+            "Alunos executaram tarefas sem compreender sua finalidade.",
+            "Não houve retomada ou síntese ao final da aula.",
+            "Professor não explicou o porquê das atividades realizadas.",
+            "Houve dispersão no conteúdo sem foco definido.",
+            "As atividades pareciam desconectadas entre si.",
+            "Alunos não souberam esclarecer o que estavam aprendendo.",
+            "Não houve direcionamento claro durante a aula.",
+            "Professor não explicitou expectativas de aprendizagem.",
+            "A aula ocorreu de forma improvisada, sem evidência de planejamento.",
+            "Não houve relação entre explicação e atividade proposta.",
+            "O conteúdo foi trabalhado sem contextualização.",
+            "Professor não retomou conceitos ou objetivos em nenhum momento.",
+            "As orientações do docente não indicaram um foco claro.",
+            "Alunos participaram, mas sem clareza do objetivo da atividade.",
+            "Não houve orientação sobre o resultado esperado das tarefas.",
+            "A aula terminou sem fechamento ou visão geral.",
+            "Não ficou evidente qual aprendizagem deveria ser construída."
+        ]
+    };
 
-  let opcaoAtual = null;
+    function selecionarOpcao(tipo, elementoClicado) {
+        const lista = document.getElementById('lista');
+        lista.innerHTML = '';
 
-  /* FUNÇÃO PRINCIPAL */
-  window.selecionarOpcao = function(tipo) {
+        // Destaque visual no botão selecionado
+        document.querySelectorAll('.btn-status').forEach(el => el.classList.remove('active'));
+        elementoClicado.classList.add('active');
 
-    const lista = document.getElementById('lista');
-    const box   = document.getElementById('box');
-    const texto = document.getElementById('texto');
+        banco[tipo].forEach(frase => {
+            const div = document.createElement('div');
+            div.className = 'opcao';
+            div.innerText = frase;
 
-    // ✅ Segurança extra
-    if (!lista || !box || !texto) {
-      console.error('Elementos do formulário não encontrados no HTML.');
-      return;
+            div.onclick = () => {
+                let campo = document.getElementById('texto');
+                if (campo.value === '') {
+                    campo.value = '• ' + frase;
+                } else {
+                    // Evita duplicidade se a frase já estiver no texto
+                    if(!campo.value.includes(frase)){
+                        campo.value += '\n• ' + frase;
+                    }
+                }
+                
+                // Pisca o fundo para dar feedback visual de que foi adicionado
+                div.style.background = '#d4edda';
+                setTimeout(() => { div.style.background = '#f8f9fa'; }, 300);
+            };
+
+            lista.appendChild(div);
+        });
     }
 
-    // Fecha se clicar na mesma opção
-    if (opcaoAtual === tipo) {
-      lista.innerHTML = '';
-      box.classList.add('hidden');
-      opcaoAtual = null;
-      return;
+    function gerarPDF() {
+        // Esconde a área de botões e seleção temporariamente para o PDF
+        const areaSelecao = document.getElementById('area-selecao');
+        areaSelecao.style.display = 'none';
+
+        const elemento = document.getElementById('conteudo-relatorio');
+        const nomeProfessor = document.getElementById('professor').value || 'Docente';
+        const dataObs = document.getElementById('data').value || 'Data';
+
+        const opt = {
+            margin:       15,
+            filename:     `Observacao_${nomeProfessor}_${dataObs}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Gera o PDF e depois restaura a visualização dos botões
+        html2pdf().set(opt).from(elemento).save().then(() => {
+            areaSelecao.style.display = 'block';
+        });
     }
-
-    opcaoAtual = tipo;
-    lista.innerHTML = '';
-
-    banco[tipo].forEach(frase => {
-
-      const div = document.createElement('div');
-      div.className = 'opcao';
-      div.textContent = frase;
-
-      div.addEventListener('click', () => {
-
-        document
-          .querySelectorAll('#lista .opcao')
-          .forEach(el => el.style.background = '#e8f0fe');
-
-        div.style.background = '#bcd4ff';
-
-        texto.value += (texto.value ? '\n' : '') + '- ' + frase;
-
-        box.classList.remove('hidden');
-        box.scrollIntoView({ behavior: 'smooth' });
-      });
-
-      lista.appendChild(div);
-    });
-  };
-
-  /* FUNÇÃO DE SUGESTÕES EXTRAS */
-  window.mostrarSugestoes = function() {
-
-    const div = document.getElementById('sugestoes');
-    const texto = document.getElementById('texto');
-
-    if (!div || !texto) return;
-
-    div.innerHTML = '';
-
-    for (let i = 1; i <= 20; i++) {
-
-      const el = document.createElement('div');
-      el.className = 'opcao';
-      el.textContent = 'Sugestão complementar ' + i;
-
-      el.addEventListener('click', () => {
-        texto.value += '\n- ' + el.textContent;
-      });
-
-      div.appendChild(el);
-    }
-  };
-
-});
 </script>
-``
+
+</body>
+</html>
