@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Observação de Aula Profissional</title>
 
-<!-- Biblioteca PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
@@ -59,6 +58,7 @@ textarea{
   margin:5px 0;
   padding:10px;
   cursor:pointer;
+  border-radius:4px;
 }
 
 .opcao:hover{
@@ -73,7 +73,6 @@ button{
   border:none;
   cursor:pointer;
 }
-
 </style>
 </head>
 
@@ -114,15 +113,16 @@ button{
 
 <script>
 
-/* ===== GARANTE CARREGAMENTO ===== */
+/* GARANTE CARREGAMENTO */
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById('data').valueAsDate = new Date();
+  const campoData = document.getElementById('data');
+  if(campoData) campoData.valueAsDate = new Date();
 });
 
-/* ===== CONTROLE ===== */
+/* CONTROLE */
 let categoriaAtualAtiva = null;
 
-/* ===== BANCO ===== */
+/* BANCO COMPLETO */
 const banco = {
 
 explicito:{
@@ -163,7 +163,17 @@ frases:[
 "Professor conduziu a aula com progressão lógica do conteúdo.",
 "A prática em sala refletia o objetivo esperado, mesmo sem ser dito.",
 "As perguntas feitas pelo professor indicavam o caminho da aprendizagem.",
-"A correção das atividades evidenciou o objetivo da aula."
+"A correção das atividades evidenciou o objetivo da aula.",
+"O conteúdo trabalhado seguiu uma sequência coerente com o planejamento.",
+"As atividades propostas estavam diretamente relacionadas ao tema da aula.",
+"Houve consistência entre o início, desenvolvimento e fechamento da aula.",
+"Professor manteve foco no conteúdo, mesmo sem explicitar o objetivo.",
+"Os alunos conseguiram realizar as tarefas dentro do esperado.",
+"A explicação conduziu naturalmente à aprendizagem pretendida.",
+"As intervenções do docente indicavam domínio do conteúdo.",
+"A escolha dos exercícios evidenciou a intenção pedagógica.",
+"Houve alinhamento entre teoria e prática proposta.",
+"A organização da aula indicava claramente a aprendizagem esperada."
 ]
 },
 
@@ -179,19 +189,28 @@ frases:[
 "Houve dispersão no conteúdo sem foco definido.",
 "As atividades pareceram desconectadas entre si.",
 "Alunos demonstraram dúvidas sobre o que estavam aprendendo.",
-"Não houve direcionamento claro durante a aula."
+"Não houve direcionamento claro durante a aula.",
+"Professor não explicitou expectativas de aprendizagem.",
+"A aula ocorreu de forma improvisada, sem evidência de planejamento.",
+"Não houve relação entre explicação e atividade proposta.",
+"O conteúdo foi trabalhado sem contextualização.",
+"Professor não retomou conceitos ou objetivos em nenhum momento.",
+"As intervenções do docente não indicaram um foco claro.",
+"Alunos participaram, mas sem clareza do objetivo da atividade.",
+"Não houve orientação sobre o resultado esperado das tarefas.",
+"A aula terminou sem fechamento ou síntese.",
+"Não ficou evidente qual aprendizagem deveria ser construída."
 ]
 }
 
 };
 
-/* ===== FUNÇÃO PRINCIPAL ===== */
+/* FUNÇÃO PRINCIPAL */
 function selecionarOpcao(tipo, botao){
 
 const lista = document.getElementById('lista');
 const titulo = document.querySelector('#area-selecao h2');
 
-/* TOGGLE */
 if(categoriaAtualAtiva === tipo){
   lista.innerHTML='';
   botao.classList.remove('active');
@@ -218,7 +237,8 @@ banco[tipo].frases.forEach(frase=>{
   div.className='opcao';
   div.innerText=frase;
 
-  div.onclick=()=>adicionarTexto(frase);
+  /* 🔥 CORREÇÃO AQUI */
+  div.onclick = () => adicionarTexto(frase, div);
 
   lista.appendChild(div);
 
@@ -226,22 +246,32 @@ banco[tipo].frases.forEach(frase=>{
 
 }
 
-/* ===== ADICIONAR TEXTO ===== */
-function adicionarTexto(frase){
+/* FUNÇÃO CORRIGIDA */
+function adicionarTexto(frase, elemento){
 
 const campo=document.getElementById('texto');
 
 if(!campo.value.includes(frase)){
+
   if(campo.value===''){
     campo.value='• '+frase;
   }else{
     campo.value+='\n• '+frase;
   }
+
+  /* feedback visual */
+  if(elemento){
+    elemento.style.background='#d4edda';
+
+    setTimeout(()=>{
+      elemento.style.background='#f1f1f1';
+    },300);
+  }
 }
 
 }
 
-/* ===== PDF ===== */
+/* PDF */
 function gerarPDF(){
 
 if(typeof html2pdf === "undefined"){
