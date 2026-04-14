@@ -499,20 +499,16 @@ function adicionarTexto(frase, indice, elemento){
 const campo = document.getElementById(`texto-${indice}`);
 
 if(!campo.value.includes(frase)){
-
   campo.value += (campo.value ? '\n' : '') + '• ' + frase;
 
   elemento.style.background = '#d4edda';
-
-  setTimeout(()=>{
-    elemento.style.background = '#f1f1f1';
-  },300);
+  setTimeout(()=> elemento.style.background='#f1f1f1',300);
 }
 
 }
 
 /* ===============================
-   PDF PROFISSIONAL
+   PDF
 ================================= */
 
 function gerarPDF(){
@@ -523,20 +519,19 @@ const professor = document.getElementById('professor').value || "Professor";
 const data = document.getElementById('data').value || "data";
 
 const opt = {
-  margin: 10,
-  filename: `Relatorio_${professor}_${data}.pdf`,
-  image: { type: 'jpeg', quality: 0.98 },
-  html2canvas: { scale: 2 },
-  jsPDF: { unit: 'mm', format: 'a4' }
+  margin:10,
+  filename:`Relatorio_${professor}_${data}.pdf`,
+  html2canvas:{scale:2},
+  jsPDF:{unit:'mm',format:'a4'}
 };
 
-/* ESCONDER BOTÕES */
-document.querySelectorAll('.no-print').forEach(el => el.style.display='none');
+const btn = document.querySelector('.btn-pdf');
+btn.innerText="Gerando PDF...";
+btn.disabled=true;
 
 html2pdf().set(opt).from(elemento).save().then(()=>{
-
-  document.querySelectorAll('.no-print').forEach(el => el.style.display='block');
-
+  btn.innerText="📄 Gerar PDF";
+  btn.disabled=false;
 });
 
 }
@@ -551,6 +546,3 @@ gerarFormulario();
 });
 
 </script>
-
-</body>
-</html>
