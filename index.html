@@ -435,12 +435,12 @@ perguntas.forEach((pergunta, index)=>{
     <h2>${pergunta.titulo}</h2>
 
     ${Object.keys(pergunta.banco).map(tipo => `
-      <div class="btn-status" onclick="selecionarOpcao(${index}, '${tipo}', this)">
+      <div class="btn-status no-print" onclick="selecionarOpcao(${index}, '${tipo}', this)">
         ${pergunta.banco[tipo].titulo}
       </div>
     `).join('')}
 
-    <div id="lista-${index}"></div>
+    <div id="lista-${index}" class="no-print"></div>
 
     <h4>Registro da seção</h4>
     <textarea id="texto-${index}"></textarea>
@@ -461,7 +461,6 @@ function selecionarOpcao(indice, tipo, botao){
 const lista = document.getElementById(`lista-${indice}`);
 const bancoAtual = perguntas[indice].banco;
 
-/* toggle */
 if(estado[indice] === tipo){
   lista.innerHTML = '';
   botao.classList.remove('active');
@@ -470,7 +469,6 @@ if(estado[indice] === tipo){
 }
 
 estado[indice] = tipo;
-
 lista.innerHTML = '';
 
 botao.parentElement.querySelectorAll('.btn-status')
@@ -478,7 +476,6 @@ botao.parentElement.querySelectorAll('.btn-status')
 
 botao.classList.add('active');
 
-/* frases */
 bancoAtual[tipo].frases.forEach(frase => {
 
   const div = document.createElement('div');
@@ -494,7 +491,7 @@ bancoAtual[tipo].frases.forEach(frase => {
 }
 
 /* ===============================
-   ADICIONAR TEXTO POR SEÇÃO
+   ADICIONAR TEXTO
 ================================= */
 
 function adicionarTexto(frase, indice, elemento){
@@ -503,11 +500,7 @@ const campo = document.getElementById(`texto-${indice}`);
 
 if(!campo.value.includes(frase)){
 
-  if(campo.value === ''){
-    campo.value = '• ' + frase;
-  }else{
-    campo.value += '\n• ' + frase;
-  }
+  campo.value += (campo.value ? '\n' : '') + '• ' + frase;
 
   elemento.style.background = '#d4edda';
 
@@ -519,11 +512,33 @@ if(!campo.value.includes(frase)){
 }
 
 /* ===============================
-   PDF
+   PDF PROFISSIONAL
 ================================= */
 
 function gerarPDF(){
-html2pdf().from(document.getElementById('conteudo')).save();
+
+const elemento = document.getElementById('conteudo');
+
+const professor = document.getElementById('professor').value || "Professor";
+const data = document.getElementById('data').value || "data";
+
+const opt = {
+  margin: 10,
+  filename: `Relatorio_${professor}_${data}.pdf`,
+  image: { type: 'jpeg', quality: 0.98 },
+  html2canvas: { scale: 2 },
+  jsPDF: { unit: 'mm', format: 'a4' }
+};
+
+/* ESCONDER BOTÕES */
+document.querySelectorAll('.no-print').forEach(el => el.style.display='none');
+
+html2pdf().set(opt).from(elemento).save().then(()=>{
+
+  document.querySelectorAll('.no-print').forEach(el => el.style.display='block');
+
+});
+
 }
 
 /* ===============================
