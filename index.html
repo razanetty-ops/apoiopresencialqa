@@ -264,9 +264,10 @@ const perguntas = [
 ]
 let opcaoAberta = null;
 
-function iniciarFormulario() {
+// Substitua a partir daqui até o final do seu arquivo
+function gerarFormulario() {
     const form = document.getElementById('formulario');
-    form.innerHTML = ""; // Limpa para evitar duplicidade
+    form.innerHTML = ""; 
     perguntas.forEach((p, i) => {
         let secao = `
             <div class="section" id="sec-${i}">
@@ -275,7 +276,7 @@ function iniciarFormulario() {
         `;
         
         for (let op in p.banco) {
-            secao += `<button class="btn-status" onclick="toggleOpcao(${i}, '${op}')">${p.banco[op].titulo}</button>`;
+            secao += `<button class="btn-status" id="btn-${i}-${op}" onclick="toggleOpcao(${i}, '${op}')">${p.banco[op].titulo}</button>`;
         }
 
         secao += `
@@ -293,14 +294,17 @@ function toggleOpcao(pIndex, opKey) {
     const lista = document.getElementById(`lista-${pIndex}`);
     const idUnico = `${pIndex}-${opKey}`;
 
-    // Se clicar no mesmo botão, ele recolhe
+    // Gerenciar estado visual dos botões
+    const botoes = document.querySelectorAll(`#botoes-${pIndex} .btn-status`);
+    botoes.forEach(btn => btn.classList.remove('active'));
+    
     if (opcaoAberta === idUnico) {
         lista.style.display = "none";
         opcaoAberta = null;
         return;
     }
 
-    // Caso contrário, limpa e abre as frases
+    document.getElementById(`btn-${pIndex}-${opKey}`).classList.add('active');
     lista.innerHTML = "";
     lista.style.display = "flex";
     opcaoAberta = idUnico;
@@ -322,8 +326,6 @@ function sincronizar(i) {
     const val = document.getElementById(`texto-${i}`).value;
     const printDiv = document.getElementById(`print-${i}`);
     printDiv.innerText = val;
-    
-    // Se não houver texto, a div de impressão some para não ocupar espaço no PDF
     printDiv.style.display = val.trim() === "" ? "none" : "block";
 }
 
@@ -335,7 +337,6 @@ function gerarPDF() {
     const componente = document.getElementById('componente').value || '-';
     const turma = document.getElementById('turma').value || '-';
 
-    // Construção de um HTML exclusivo para o PDF (estilo relatório oficial)
     let htmlPDF = `
         <div style="padding: 30px; font-family: Arial, sans-serif; color: #000; line-height: 1.4;">
             <div style="text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px;">
@@ -363,10 +364,8 @@ function gerarPDF() {
             </table>
     `;
 
-    // Percorre as perguntas e adiciona ao PDF apenas o que foi preenchido
     perguntas.forEach((p, idx) => {
         const texto = document.getElementById(`texto-${idx}`).value.trim();
-        
         if (texto) {
             htmlPDF += `
                 <div style="margin-bottom: 20px; page-break-inside: avoid;">
@@ -379,13 +378,12 @@ function gerarPDF() {
         }
     });
 
-    // Rodapé com data de emissão e espaço para assinatura
     htmlPDF += `
             <div style="margin-top: 50px; text-align: center; font-size: 10px;">
                 <p>Documento gerado digitalmente em: ${new Date().toLocaleString('pt-BR')}</p>
-                <div style="margin-top: 60px; display: flex; justify-content: space-around;">
-                    <div style="border-top: 1px solid #000; width: 200px; padding-top: 5px;">Assinatura do Observador</div>
-                    <div style="border-top: 1px solid #000; width: 200px; padding-top: 5px;">Assinatura do Professor</div>
+                <div style="margin-top: 60px; display: flex; justify-content: space-around; gap: 40px;">
+                    <div style="border-top: 1px solid #000; width: 250px; padding-top: 5px;">Assinatura do Observador</div>
+                    <div style="border-top: 1px solid #000; width: 250px; padding-top: 5px;">Assinatura do Professor</div>
                 </div>
             </div>
         </div>
@@ -396,25 +394,23 @@ function gerarPDF() {
 
     const configuracao = {
         margin: [10, 10, 10, 10],
-        filename: `Observacao_${professor.replace(/\s+/g, '_')}_${data.replace(/\//g, '-')}.pdf`,
+        filename: `Observacao_${professor.replace(/\s+/g, '_')}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, letterRendering: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: 'avoid-all' }
     };
 
-    // Gera o arquivo
     html2pdf().set(configuracao).from(elementoTemporario).save();
 }
 
-// Inicialização do formulário ao carregar a página
+// Inicialização correta
 document.addEventListener("DOMContentLoaded", () => {
-    // Define a data de hoje como padrão no input
     const hoje = new Date().toISOString().split('T')[0];
-    document.getElementById('data').value = hoje;
+    const dataInput = document.getElementById('data');
+    if(dataInput) dataInput.value = hoje;
     
-    // Constrói os campos do formulário
-    gerarFormulario();
+    gerarFormulario(); // Nome corrigido aqui
 });
 </script>
 </body>
