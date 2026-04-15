@@ -285,7 +285,7 @@ function gerarFormulario() {
         secao += `
                 </div>
                 <div id="lista-${i}" class="lista-opcoes no-print" style="display:none;"></div>
-                <textarea id="texto-${i}" class="no-print" placeholder="Digite ou selecione frases acima..." oninput="sincronizar(${i})"></textarea>
+                <textarea id="texto-${i}" class="no-print" placeholder="Escreva ou selecione frases..." oninput="sincronizar(${i})"></textarea>
                 <div id="print-${i}" class="print-text"></div>
             </div>
         `;
@@ -335,7 +335,7 @@ function sincronizar(i) {
     }
 }
 
-function gerarPDF() {
+async function gerarPDF() {
     const professor = document.getElementById('professor').value || 'Docente';
     const dataInput = document.getElementById('data').value;
     const data = dataInput ? dataInput.split('-').reverse().join('/') : '-';
@@ -343,90 +343,72 @@ function gerarPDF() {
     const componente = document.getElementById('componente').value || '-';
     const turma = document.getElementById('turma').value || '-';
 
-    // Construção do HTML do Relatório
-    let conteudoHTML = `
-        <div style="padding: 40px; font-family: Arial, sans-serif; color: #000; background: #fff;">
-            <div style="text-align: center; border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-                <h1 style="margin: 0; font-size: 22px; text-transform: uppercase;">Relatório de Observação de Aula</h1>
-                <p style="margin: 5px 0 0; font-size: 12px; color: #555;">Documento de Apoio Pedagógico</p>
+    // Construção do Relatório
+    let relatorioHTML = `
+        <div id="pdf-content" style="padding: 40px; font-family: Arial, sans-serif; color: #000; background: #fff; width: 700px;">
+            <div style="text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px;">
+                <h1 style="margin: 0; font-size: 20px; text-transform: uppercase;">Relatório de Observação de Aula</h1>
             </div>
 
-            <table style="width: 100%; margin-bottom: 30px; font-size: 13px; border-collapse: collapse;">
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #ccc; background: #f9f9f9;"><strong>Escola:</strong></td>
-                    <td style="padding: 8px; border: 1px solid #ccc;">${escola}</td>
-                    <td style="padding: 8px; border: 1px solid #ccc; background: #f9f9f9;"><strong>Data:</strong></td>
-                    <td style="padding: 8px; border: 1px solid #ccc;">${data}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #ccc; background: #f9f9f9;"><strong>Professor:</strong></td>
-                    <td style="padding: 8px; border: 1px solid #ccc;">${professor}</td>
-                    <td style="padding: 8px; border: 1px solid #ccc; background: #f9f9f9;"><strong>Turma:</strong></td>
-                    <td style="padding: 8px; border: 1px solid #ccc;">${turma}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #ccc; background: #f9f9f9;"><strong>Componente:</strong></td>
-                    <td colspan="3" style="padding: 8px; border: 1px solid #ccc;">${componente}</td>
-                </tr>
-            </table>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; font-size: 12px;">
+                <div><strong>Escola:</strong> ${escola}</div>
+                <div><strong>Data:</strong> ${data}</div>
+                <div><strong>Professor:</strong> ${professor}</div>
+                <div><strong>Turma:</strong> ${turma}</div>
+                <div style="grid-column: span 2;"><strong>Componente:</strong> ${componente}</div>
+            </div>
+            <hr>
     `;
 
     perguntas.forEach((p, idx) => {
-        const areaTexto = document.getElementById(`texto-${idx}`);
-        const textoOriginal = areaTexto ? areaTexto.value.trim() : "";
-        
-        if (textoOriginal) {
-            // Converte quebras de linha em <br> para o PDF entender
-            const textoFormatado = textoOriginal.replace(/\n/g, '<br>');
-            conteudoHTML += `
-                <div style="margin-bottom: 25px; page-break-inside: avoid;">
-                    <h2 style="font-size: 14px; color: #222; border-bottom: 1px solid #ddd; padding-bottom: 5px; text-transform: uppercase; margin-bottom: 10px;">
-                        ${p.titulo}
-                    </h2>
-                    <div style="font-size: 12px; line-height: 1.6; text-align: justify;">${textoFormatado}</div>
+        const txt = document.getElementById(`texto-${idx}`).value.trim();
+        if (txt) {
+            relatorioHTML += `
+                <div style="margin-top: 20px; page-break-inside: avoid;">
+                    <h2 style="font-size: 14px; text-transform: uppercase; background: #eee; padding: 5px;">${p.titulo}</h2>
+                    <p style="font-size: 12px; white-space: pre-wrap; text-align: justify;">${txt}</p>
                 </div>
             `;
         }
     });
 
-    conteudoHTML += `
-            <div style="margin-top: 60px; text-align: center; font-size: 11px;">
-                <p>Emitido em: ${new Date().toLocaleString('pt-BR')}</p>
-                <div style="margin-top: 70px; display: flex; justify-content: space-around;">
-                    <div style="border-top: 1px solid #000; width: 220px; padding-top: 5px;">Assinatura do Observador</div>
-                    <div style="border-top: 1px solid #000; width: 220px; padding-top: 5px;">Assinatura do Professor</div>
+    relatorioHTML += `
+            <div style="margin-top: 50px; text-align: center; font-size: 10px;">
+                <div style="display: flex; justify-content: space-around; margin-top: 40px;">
+                    <div style="border-top: 1px solid #000; width: 200px;">Assinatura do Observador</div>
+                    <div style="border-top: 1px solid #000; width: 200px;">Assinatura do Professor</div>
                 </div>
             </div>
         </div>
     `;
 
-    // CRÍTICO: Criar elemento oculto no body para o html2pdf capturar corretamente
-    const tempDiv = document.createElement('div');
-    tempDiv.style.position = 'fixed';
-    tempDiv.style.left = '-9999px';
-    tempDiv.innerHTML = conteudoHTML;
-    document.body.appendChild(tempDiv);
+    // Criar e injetar o elemento no DOM para que o html2pdf o "veja"
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'fixed';
+    tempContainer.style.top = '0';
+    tempContainer.style.left = '-10000px'; // Fora da tela mas no DOM
+    tempContainer.innerHTML = relatorioHTML;
+    document.body.appendChild(tempContainer);
 
     const opt = {
-        margin: [10, 10, 10, 10],
-        filename: `Relatorio_Observacao_${professor.replace(/\s+/g, '_')}.pdf`,
+        margin: 10,
+        filename: `Observacao_${professor.replace(/\s+/g, '_')}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // Gera o PDF e remove o elemento temporário depois
-    html2pdf().set(opt).from(tempDiv).save().then(() => {
-        document.body.removeChild(tempDiv);
-    });
+    // Aguarda 500ms para garantir que o browser desenhou o texto
+    setTimeout(() => {
+        html2pdf().set(opt).from(tempContainer).save().then(() => {
+            document.body.removeChild(tempContainer);
+        });
+    }, 500);
 }
 
-// Inicialização Final
 document.addEventListener("DOMContentLoaded", () => {
-    const inputData = document.getElementById('data');
-    if (inputData) {
-        inputData.value = new Date().toISOString().split('T')[0];
-    }
+    const d = document.getElementById('data');
+    if (d) d.value = new Date().toISOString().split('T')[0];
     gerarFormulario();
 });
 </script>
