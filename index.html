@@ -264,89 +264,90 @@ const perguntas = [
 ]
 let opcaoAberta = null;
 
-// Substitua a partir daqui até o final do seu arquivo
-// 1. FUNÇÃO QUE CRIA O FORMULÁRIO (Certifique-se que o nome é este)
-<script>
+/<script>
 
-// 🔁 GARANTE QUE O FORMULÁRIO SEMPRE CARREGUE
-function iniciarFormularioSeguro() {
-    try {
-        if (typeof iniciarFormulario === "function") {
-            iniciarFormulario();
-        } else {
-            console.error("Função iniciarFormulario não encontrada");
-        }
-    } catch (e) {
-        console.error("Erro ao montar formulário:", e);
-    }
-}
-
-
-// 📄 GERAR PDF
 function gerarPDF() {
     const professor = document.getElementById('professor').value || 'Docente';
     const dataInput = document.getElementById('data').value;
     const data = dataInput ? dataInput.split('-').reverse().join('/') : '-';
+    const escola = document.getElementById('escola').value || '-';
+    const componente = document.getElementById('componente').value || '-';
+    const turma = document.getElementById('turma').value || '-';
 
-    let htmlPDF = `
-        <div style="padding:20px; font-family:Arial;">
-            <h1>Relatório de Observação de Aula</h1>
-            <p><strong>Professor:</strong> ${professor}</p>
-            <p><strong>Data:</strong> ${data}</p>
-            <hr>
+    // 🔥 container visível para o html2pdf funcionar
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '800px';
+    container.style.background = '#fff';
+    container.style.padding = '20px';
+    container.style.fontFamily = 'Arial';
+
+    let html = `
+        <h1 style="text-align:center;">Relatório de Observação de Aula</h1>
+
+        <p><strong>Escola:</strong> ${escola}</p>
+        <p><strong>Data:</strong> ${data}</p>
+        <p><strong>Professor:</strong> ${professor}</p>
+        <p><strong>Turma:</strong> ${turma}</p>
+        <p><strong>Componente:</strong> ${componente}</p>
+        <hr>
     `;
 
     let temConteudo = false;
 
-    if (typeof perguntas !== "undefined") {
-        perguntas.forEach((p, idx) => {
-            const campo = document.getElementById(`texto-${idx}`);
-            if (!campo) return;
+    perguntas.forEach((p, idx) => {
+        const campo = document.getElementById(`texto-${idx}`);
+        if (!campo) return;
 
-            const texto = campo.value.trim();
+        const texto = campo.value.trim();
 
-            if (texto) {
-                temConteudo = true;
-                htmlPDF += `<h3>${p.titulo}</h3><p>${texto}</p>`;
-            }
-        });
-    }
+        if (texto) {
+            temConteudo = true;
+            html += `
+                <h3>${p.titulo}</h3>
+                <p style="white-space: pre-wrap;">${texto}</p>
+            `;
+        }
+    });
 
     if (!temConteudo) {
-        htmlPDF += `<p><em>Nenhum conteúdo preenchido.</em></p>`;
+        html += `<p><em>Nenhuma informação foi preenchida no relatório.</em></p>`;
     }
 
-    htmlPDF += `</div>`;
+    container.innerHTML = html;
 
-    const div = document.createElement('div');
-    div.innerHTML = htmlPDF;
+    // ESSENCIAL: adicionar ao DOM
+    document.body.appendChild(container);
 
-    html2pdf().from(div).save(`Relatorio_${professor}.pdf`);
+    const opt = {
+        margin: 10,
+        filename: `Relatorio_${professor}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf()
+        .set(opt)
+        .from(container)
+        .save()
+        .then(() => {
+            document.body.removeChild(container);
+        });
 }
 
 
-// 🚀 INICIALIZAÇÃO FORÇADA
+// ✅ inicialização correta (mantém seu formulário funcionando)
 document.addEventListener("DOMContentLoaded", () => {
-
-    console.log("Página carregada");
-
-    // seta data
+    const hoje = new Date().toISOString().split('T')[0];
     const campoData = document.getElementById('data');
-    if (campoData) {
-        campoData.value = new Date().toISOString().split('T')[0];
+    if (campoData) campoData.value = hoje;
+
+    if (typeof iniciarFormulario === "function") {
+        iniciarFormulario();
     }
-
-    // tenta iniciar
-    iniciarFormularioSeguro();
-
-    // fallback (caso algo impeça)
-    setTimeout(() => {
-        const form = document.getElementById('formulario');
-        if (form && form.innerHTML.trim() === "") {
-            console.warn("Formulário não carregou, tentando novamente...");
-            iniciarFormularioSeguro();
-        }
-    }, 500);
 });
 
 </script>
