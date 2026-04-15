@@ -283,25 +283,81 @@ function syncText(idx) {
 }
 
 function gerarPDF(){
-    const elemento = document.getElementById('conteudo');
-    const professor = document.getElementById('professor').value || "Docente";
-    const data = document.getElementById('data').value || "Relatorio";
-    
+    const conteudo = document.getElementById('conteudo');
+
+    // Clonar conteúdo para não mexer no original
+    const clone = conteudo.cloneNode(true);
+
+    // Montar relatório formatado
+    let relatorio = `
+        <div style="font-family: Arial; font-size: 12px; line-height: 1.5;">
+            <h1 style="text-align:center;">RELATÓRIO DE OBSERVAÇÃO DE AULA</h1>
+            <hr>
+    `;
+
+    // Cabeçalho
+    const data = document.getElementById('data').value;
+    const escola = document.getElementById('escola').value;
+    const professor = document.getElementById('professor').value;
+    const componente = document.getElementById('componente').value;
+    const turma = document.getElementById('turma').value;
+
+    relatorio += `
+        <p><strong>Data:</strong> ${data || '-'}</p>
+        <p><strong>Escola:</strong> ${escola || '-'}</p>
+        <p><strong>Professor:</strong> ${professor || '-'}</p>
+        <p><strong>Componente:</strong> ${componente || '-'}</p>
+        <p><strong>Turma:</strong> ${turma || '-'}</p>
+        <hr>
+    `;
+
+    // Seções
+    perguntas.forEach((p, idx) => {
+        const texto = document.getElementById(`texto-${idx}`).value;
+
+        if(texto.trim()){
+            relatorio += `
+                <h2 style="font-size:14px; margin-top:15px;">${p.titulo}</h2>
+                <p style="text-align:justify;">
+                    ${texto.replace(/\n/g, '<br>')}
+                </p>
+            `;
+        }
+    });
+
+    relatorio += `</div>`;
+
+    // Criar container temporário
+    const temp = document.createElement('div');
+    temp.innerHTML = relatorio;
+
     const opt = {
         margin: [10, 10, 10, 10],
-        filename: `Obs_Aula_${professor}_${data}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        filename: `Relatorio_${professor || 'Docente'}.pdf`,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 2 },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait'
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
-    html2pdf().set(opt).from(elemento).save();
-}
+    html2pdf()
+        .set(opt)
+        .from(temp)
+        .toPdf()
+        .get('pdf')
+        .then(pdf => {
+            const totalPages = pdf.internal.getNumberOfPages();
 
-document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById('data').valueAsDate = new Date();
-    gerarFormulario();
-});
-</script>
-</body>
-</html>
+            // 🔥 Limitar a 2 páginas
+            if (totalPages > 2) {
+                for (let i = totalPages; i > 2; i--) {
+                    pdf.deletePage(i);
+                }
+            }
+        })
+        .save();
+}
