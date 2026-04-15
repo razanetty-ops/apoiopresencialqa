@@ -1,394 +1,336 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório de Observação de Aula - SEDUC SP</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Observação de Aula</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --secondary: #34495e;
-            --accent: #bcd4ff;
-            --bg: #f4f7f6;
-            --white: #ffffff;
-            --success: #d4edda;
-        }
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background: #eef;
+  margin: 0;
+  padding: 20px;
+}
 
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: var(--bg);
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
+.container{
+  max-width: 1000px;
+  margin: auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
 
-        .container {
-            max-width: 900px;
-            margin: auto;
-            background: var(--white);
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+h1, h2{ color: #2c3e50; }
 
-        h1 {
-            text-align: center;
-            color: var(--primary);
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-        }
+.section{
+  margin-bottom: 35px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #ccc;
+  page-break-inside: avoid;
+}
 
-        h2 {
-            font-size: 1.2rem;
-            color: var(--secondary);
-            margin-top: 0;
-        }
+.header-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
 
-        .header-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 5px;
-        }
+input, textarea{
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
 
-        .field-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: bold;
-            color: #666;
-            margin-bottom: 5px;
-        }
+textarea{ height: 140px; font-family: inherit; }
 
-        input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
+.btn-status{
+  background: #e8f0fe;
+  padding: 10px 15px;
+  margin: 5px;
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #d1d9e6;
+  font-size: 14px;
+}
 
-        .section {
-            margin-bottom: 40px;
-            padding: 20px;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            page-break-inside: avoid;
-        }
+.btn-status.active{
+  background: #bcd4ff;
+  font-weight: bold;
+}
 
-        /* Botões de Categoria */
-        .status-container {
-            margin: 15px 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+.lista-opcoes {
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
 
-        .btn-status {
-            background: #f0f2f5;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 20px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-            transition: 0.3s;
-        }
+.opcao{
+  background: #f8f9fa;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  border-left: 4px solid transparent;
+  transition: 0.2s;
+  font-size: 14px;
+}
 
-        .btn-status:hover { background: #e2e6ea; }
-        .btn-status.active {
-            background: var(--accent);
-            border-color: var(--primary);
-            font-weight: bold;
-        }
+.opcao:hover{ background: #ddd; }
 
-        /* Lista de Frases */
-        .lista-frases {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin: 15px 0;
-        }
+.opcao.selecionado{
+  background: #d4edda;
+  border-left-color: #28a745;
+}
 
-        .opcao {
-            background: #fff;
-            border: 1px solid #eee;
-            padding: 10px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 13px;
-            transition: 0.2s;
-        }
+.btn-pdf{
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 15px 25px;
+  background: #2c3e50;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 50px;
+  font-size: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 1000;
+}
 
-        .opcao:hover { background: #f8f9fa; border-color: #ccc; }
-        .opcao.selecionado {
-            background: var(--success);
-            border-color: #c3e6cb;
-        }
+.btn-pdf:hover { background: #34495e; }
 
-        /* Área de Texto */
-        textarea {
-            width: 100%;
-            height: 120px;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            resize: vertical;
-            font-family: inherit;
-            box-sizing: border-box;
-            background: #fff;
-        }
+/* Ajuste para o PDF não cortar o texto do textarea */
+.print-text {
+    display: none;
+    white-space: pre-wrap;
+    padding: 10px;
+    border: 1px solid #eee;
+    background: #fafafa;
+    min-height: 50px;
+}
 
-        /* Botão Flutuante PDF */
-        .controls {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 100;
-        }
-
-        .btn-pdf {
-            padding: 15px 25px;
-            background: #e74c3c;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: 0.3s;
-        }
-
-        .btn-pdf:hover { transform: scale(1.05); background: #c0392b; }
-
-        /* Ajustes para o PDF */
-        .pdf-text {
-            display: none;
-            white-space: pre-wrap;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #333;
-            background: #fff;
-            padding: 10px;
-            border: 1px solid #eee;
-        }
-
-        @media print {
-            .no-print { display: none !important; }
-            .container { box-shadow: none; width: 100%; padding: 0; }
-            textarea { display: none; }
-            .pdf-text { display: block; }
-            .section { border: none; border-bottom: 1px solid #eee; }
-        }
-
-        @media (max-width: 600px) {
-            .lista-frases { grid-template-columns: 1fr; }
-        }
-    </style>
+@media print{
+  .no-print{ display: none !important; }
+  body { background: #fff; padding: 0; }
+  .container { box-shadow: none; width: 100%; }
+  textarea { display: none; }
+  .print-text { display: block; }
+  .btn-pdf { display: none; }
+}
+</style>
 </head>
+
 <body>
 
 <div class="container" id="conteudo">
-    <h1>Relatório de Observação de Aula</h1>
 
-    <div class="header-grid">
-        <div class="field-group">
-            <label>Data da Observação</label>
-            <input type="date" id="data">
-        </div>
-        <div class="field-group">
-            <label>Unidade Escolar</label>
-            <input id="escola" placeholder="Nome da Escola">
-        </div>
-        <div class="field-group">
-            <label>Professor(a)</label>
-            <input id="professor" placeholder="Nome completo">
-        </div>
-        <div class="field-group">
-            <label>Componente Curricular</label>
-            <input id="componente" placeholder="Ex: Matemática">
-        </div>
-        <div class="field-group">
-            <label>Turma</label>
-            <input id="turma" placeholder="Ex: 9º Ano A">
-        </div>
-    </div>
+<h1>Relatório de Observação de Aula</h1>
 
-    <div id="formulario"></div>
+<div class="header-grid">
+    <div><label>Data:</label><input type="date" id="data"></div>
+    <div><label>Escola:</label><input id="escola" placeholder="Nome da Escola"></div>
+    <div><label>Professor:</label><input id="professor" placeholder="Nome do Professor"></div>
+    <div><label>Componente:</label><input id="componente" placeholder="Componente Curricular"></div>
+    <div><label>Turma:</label><input id="turma" placeholder="Turma"></div>
 </div>
 
-<div class="controls no-print">
-    <button class="btn-pdf" onclick="gerarPDF()">📄 Salvar Relatório em PDF</button>
+<div id="formulario"></div>
+
 </div>
+
+<button class="btn-pdf no-print" onclick="gerarPDF()">📄 Gerar PDF</button>
 
 <script>
-/* BANCO DE DADOS */
+
+/* ===============================
+BANCO DE PERGUNTAS ORIGINAL
+================================= */
+
 const perguntas = [
-    {
-        titulo: "1. Planejamento e Domínio: Objetivos da Aula",
-        banco: {
-            explicito: {
-                titulo: "Objetivo Explícito",
-                frases: ["Professor apresentou os objetivos no quadro no início da aula.", "Docente explicou claramente o que os alunos deveriam aprender.", "Retomou o objetivo durante a explicação para fortalecer o foco.", "Ao final, validou o progresso em relação ao objetivo inicial.", "Questionou os alunos sobre o que estavam aprendendo no momento."]
-            },
-            implicito: {
-                titulo: "Objetivo Implícito",
-                frases: ["Atividades alinhadas ao conteúdo, mas sem explicitação direta.", "Sequência didática indicava o objetivo, embora não verbalizado.", "Houve coerência entre explicação e atividade prática.", "O tipo de exercício indicava o foco da aprendizagem esperado."]
-            },
-            nao: {
-                titulo: "Não Evidenciado",
-                frases: ["Professor iniciou a aula sem apresentar a finalidade da aprendizagem.", "Não houve clareza sobre o propósito das tarefas propostas.", "Alunos executaram tarefas sem compreender sua finalidade pedagógica."]
-            }
-        }
-    },
-    {
-        titulo: "2. Uso de Recursos Pedagógicos (Material Digital/Multimídia)",
-        banco: {
-            alto: {
-                titulo: "Domínio e Integração",
-                frases: ["Utilizou recursos digitais de forma intencional e fluida.", "Demonstrou domínio técnico da lousa digital e projetor.", "Adaptou o uso dos recursos conforme a necessidade da turma.", "Vídeos e slides serviram como apoio real à construção do conceito."]
-            },
-            medio: {
-                titulo: "Uso Básico/Mecânico",
-                frases: ["Utilizou recursos sem ajustes ou personalização para a turma.", "Manteve o roteiro digital mesmo com dificuldades técnicas.", "O recurso foi utilizado, mas com pouca mediação pedagógica."]
-            },
-            baixo: {
-                titulo: "Dificuldade/Desconexão",
-                frases: ["Uso de tecnologia sem intencionalidade pedagógica clara.", "Demonstrou dificuldades técnicas que interromperam o fluxo da aula.", "Recurso desconectado do objetivo de aprendizagem."]
-            }
-        }
-    },
-    {
-        titulo: "3. Mediação e Explicação do Conteúdo",
-        banco: {
-            alto: {
-                titulo: "Segurança e Aprofundamento",
-                frases: ["Conduziu explicações com clareza, utilizando exemplos do cotidiano.", "Respondeu prontamente às dúvidas, aprofundando conceitos.", "Utilizou analogias eficazes para facilitar a compreensão.", "Demonstrou alto domínio conceitual e segurança."]
-            },
-            medio: {
-                titulo: "Parcial/Inseguro",
-                frases: ["Demonstrou conhecimento, mas hesitou em dúvidas complexas.", "As respostas foram corretas, porém pouco exploradas.", "Manteve a explicação padrão, sem diversificar a estratégia."]
-            },
-            baixo: {
-                titulo: "Superficial/Confuso",
-                frases: ["Explicações superficiais que não favoreceram a compreensão.", "Houve erros conceituais ou imprecisões durante a fala.", "Não conseguiu organizar o raciocínio de forma clara para os alunos."]
-            }
-        }
-    },
-    {
-        titulo: "4. Verificação da Aprendizagem (Check for Understanding)",
-        banco: {
-            alto: {
-                titulo: "Estratégias Diversificadas",
-                frases: ["Circulou pela sala monitorando as produções individuais.", "Utilizou a técnica de 'Puxe Mais' para aprofundar respostas.", "Pediu para alunos explicarem o conceito para os colegas.", "Fez perguntas direcionadas para checar a compreensão em tempo real."]
-            },
-            nao_observado: {
-                titulo: "Não Observado",
-                frases: ["Não houve momentos claros de checagem de entendimento.", "O professor seguiu a aula sem validar se os alunos acompanhavam.", "Apenas perguntou 'entenderam?', sem exigir evidência de compreensão."]
-            }
+{
+    titulo:"Planejamento e Domínio: Objetivos da Aula",
+    banco:{
+        explicito:{
+            titulo:"Objetivo ficou explícito ao longo da aula",
+            frases:["Professor apresentou os objetivos no quadro no início da aula.","Docente explicou claramente o que os alunos deveriam aprender antes de iniciar a atividade.","Professor retomou o objetivo durante a explicação para fortalecer o foco da aula.","Ao final, o docente retomou o objetivo e validou o progresso.","Durante a atividade, o professor questionou os alunos sobre o que estavam aprendendo.","Objetivos foram escritos no quadro e revisitados durante a aula.","Professor relacionou cada atividade ao objetivo proposto.","Alunos foram convidados a explicar com suas palavras o objetivo da aula.","Professor contextualizou o conteúdo com situações práticas ligadas ao objetivo.","Houve explicitação do para que aprender antes da execução das tarefas.","Docente utilizou exemplos claros conectando a atividade ao objetivo.","Professor fez síntese final retomando os objetivos trabalhados.","Objetivo foi apresentado em slide e discutido com a turma.","Professor deixou claro o que seria avaliado na aula.","Durante correção, retomou o objetivo para consolidar a aprendizagem.","Professor comparou o objetivo com o resultado das atividades realizadas.","Objetivos foram apresentados em linguagem acessível aos alunos.","Houve retomada do objetivo após dúvidas dos estudantes.","Professor utilizou perguntas norteadoras alinhadas ao objetivo.","A aula foi estruturada explicitamente em função do objetivo proposto."]
+        },
+        implicito:{
+            titulo:"Objetivo ficou implícito, mas houve coerência",
+            frases:["As atividades estavam alinhadas ao conteúdo esperado, mesmo sem explicitação direta.","Professor iniciou diretamente com atividades consistentes com a proposta de aprendizagem.","A sequência didática indicava claramente o objetivo, embora não verbalizado.","As intervenções do professor direcionavam para a aprendizagem esperada.","Houve coerência entre explicação, atividade e correção.","O tipo de exercício indicava o foco da aprendizagem.","Professor conduziu a aula com progressão lógica do conteúdo.","A prática em sala refletia o objetivo esperado, mesmo sem ser dito.","As perguntas feitas pelo professor indicavam o caminho da aprendizagem.","A correção das atividades evidenciou o objetivo da aula.","O conteúdo trabalhado seguiu uma sequência coerente com o planejamento.","As atividades propostas estavam diretamente relacionadas ao tema da aula.","Houve consistência entre o início, desenvolvimento e fechamento da aula.","Professor manteve foco no conteúdo, mesmo sem explicitar o objetivo.","Os alunos conseguiram realizar as tarefas dentro do esperado.","A explicação conduziu naturalmente à aprendizagem pretendida.","As intervenções do docente indicavam domínio do conteúdo.","A escolha dos exercícios evidenciou a intenção pedagógica.","Houve alinhamento entre teoria e prática proposta.","A organização da aula indicava claramente a aprendizagem esperada."]
+        },
+        nao:{
+            titulo:"Objetivo não ficou evidente",
+            frases:["Professor iniciou a aula sem apresentar o que seria aprendido.","Não houve clareza sobre o propósito das atividades propostas.","As atividades foram realizadas sem conexão aparente com um objetivo.","Alunos executaram tarefas sem compreender sua finalidade.","Não houve retomada ou síntese ao final da aula.","Professor não explicou o porquê das atividades realizadas.","Houve dispersão no conteúdo sem foco definido.","As atividades pareceram desconectadas entre si.","Alunos demonstraram dúvidas sobre o que estavam aprendendo.","Não houve direcionamento claro durante a aula.","Professor não explicitou expectativas de aprendizagem.","A aula ocorreu de forma improvisada, sem evidência de planejamento.","Não houve relação entre explicação e atividade proposta.","O conteúdo foi trabalhado sem contextualização.","Professor não retomou conceitos ou objetivos em nenhum momento.","As intervenções do docente não indicaram um foco claro.","Alunos participaram, mas sem clareza do objetivo da atividade.","Não houve orientação sobre o resultado esperado das tarefas.","A aula terminou sem fechamento ou síntese.","Não ficou evidente qual aprendizagem deveria ser construída."]
         }
     }
+},
+{
+    titulo:"Considerando os recursos pedagógicos que o professor utilizou (material digital, impresso e plataformas), ele:",
+    banco:{
+        alto:{
+            titulo:"Demonstrou domínio dos recursos, conectando com a metodologia e adaptando quando necessário.",
+            frases:["O professor utilizou recursos digitais de forma intencional.","Demonstrou domínio no uso da lousa digital.","Adaptou o uso dos recursos conforme a necessidade da turma.","Utilizou vídeos como apoio à aprendizagem.","Integração entre recursos e metodologia.","Flexibilidade na utilização dos recursos.","Uso estratégico da tecnologia.","Diversificou recursos pedagógicos.","Promoveu participação ativa com recursos.","Planejou previamente o uso dos recursos.","Articulou recursos com objetivos.","Utilizou diferentes mídias.","Adaptação para diferentes ritmos.","Uso eficaz de plataformas.","Segurança no uso de ferramentas.","Explorou potencial pedagógico dos recursos.","Integração teoria e prática.","Uso consciente da tecnologia.","Recursos como apoio significativo.","Favoreceu compreensão com recursos."]
+        },
+        medio:{
+            titulo:"Demonstrou domínio dos recursos, mas com dificuldade de adaptação quando necessário",
+            frases:["Utilizou recursos sem ajustes.","Manteve planejamento mesmo com dificuldades.","Pouca flexibilidade pedagógica.","Uso correto, mas limitado.","Sem adaptação às necessidades.","Intervenção pedagógica limitada.","Pouca variação de recursos.","Seguiu roteiro fixo.","Uso padronizado dos recursos.","Sem personalização.","Exploração superficial.","Pouca mediação pedagógica.","Uso repetitivo.","Sem inovação metodológica.","Pouca interação dos alunos.","Foco técnico, não pedagógico.","Sem ajustes em tempo real.","Rigidez no uso dos recursos.","Uso previsível.","Pouco impacto na aprendizagem."]
+        },
+        baixo:{
+            titulo:"Uso mecanizado ou desconectado do objetivo de aprendizagem demonstrando não entender as propostas de aprendizagem",
+            frases:["Uso sem objetivo claro.","Tecnologia sem intencionalidade.","Recursos como apoio superficial.","Sem relação com aprendizagem.","Uso mecânico.","Sem articulação pedagógica.","Pouco impacto na compreensão.","Sem mediação.","Uso passivo pelos alunos.","Dificuldade no uso.","Dependência do recurso.","Sem adaptação ao nível da turma.","Sem explicação do uso.","Sem integração.","Recursos desconectados.","Sem propósito pedagógico.","Sem desenvolvimento de habilidades.","Sem avanço da aprendizagem.","Uso inadequado.","Baixa efetividade."]
+        }
+    }
+},
+{
+    titulo:"Considerando as explicações que o professor fez sobre o conteúdo, ele:",
+    banco:{
+        alto:{
+            titulo:"Demonstrou segurança ao explicar, mostrando exemplos, respondendo dúvidas dos estudantes e aprofundando quando possível.",
+            frases:["O professor conduziu as explicações com clareza e segurança, utilizando exemplos variados e adequados ao nível da turma, além de responder prontamente às dúvidas apresentadas.","Demonstrou domínio do conteúdo ao apresentar diferentes formas de explicação, garantindo a compreensão dos alunos.","Durante a aula, respondeu às dúvidas com precisão e aprofundou conceitos quando necessário.","Utilizou exemplos contextualizados que facilitaram a compreensão dos conteúdos trabalhados.","Ao perceber dificuldades, reformulou a explicação de maneira eficaz.","Demonstrou fluidez e segurança na condução das explicações ao longo da aula.","Relacionou o conteúdo com situações do cotidiano, ampliando o entendimento dos alunos.","Fez uso de diferentes estratégias explicativas, atendendo às necessidades da turma.","Incentivou perguntas e respondeu com clareza e objetividade.","Aprofundou o conteúdo conforme o interesse e as dúvidas dos alunos.","Apresentou exemplos progressivos, do mais simples ao mais complexo.","Demonstrou domínio conceitual ao fazer conexões com conteúdos anteriores.","Utilizou linguagem acessível sem perder o rigor conceitual.","Conduziu a explicação de forma organizada e estruturada.","Promoveu a participação dos alunos durante as explicações.","Esclareceu dúvidas individuais e coletivas com segurança.","Demonstrou preparo ao lidar com questionamentos inesperados.","Utilizou analogias e comparações para facilitar a compreensão.","Ajustou o nível de aprofundamento conforme o desenvolvimento da aula.","Evidenciou domínio do conteúdo ao longo de toda a explicação."]
+        },
+        medio:{
+            titulo:"Demonstrou preparo, mas com inseguranças em aprofundamento ou adaptação",
+            frases:["O professor demonstrou conhecimento do conteúdo, porém apresentou dificuldades ao responder dúvidas mais específicas dos alunos.","Conduziu a explicação de forma adequada, mas com limitações ao aprofundar conceitos.","Demonstrou preparo inicial, porém hesitou diante de questionamentos mais complexos.","Utilizou exemplos pertinentes, mas com pouca variação.","Teve dificuldade em reformular explicações quando os alunos não compreenderam.","Manteve a explicação prevista, mesmo diante de dúvidas recorrentes.","Demonstrou domínio básico, mas com insegurança em situações imprevistas.","As respostas às dúvidas foram corretas, porém pouco aprofundadas.","Apresentou explicações claras, mas com pouca flexibilidade pedagógica.","Houve dificuldade em diversificar estratégias explicativas.","O professor não conseguiu explorar plenamente os questionamentos dos alunos.","Demonstrou preparo, mas com limitações na mediação das dúvidas.","As explicações foram adequadas, porém pouco aprofundadas.","Demonstrou insegurança ao tentar explicar o conteúdo de outra maneira.","As respostas foram corretas, mas pouco exploradas conceitualmente.","O professor manteve foco no conteúdo, mas com pouca adaptação às necessidades da turma.","Demonstrou conhecimento, mas com limitações na ampliação do conteúdo.","Houve dificuldade em conectar o conteúdo com outros conhecimentos.","A condução da explicação foi adequada, porém sem aprofundamento significativo."]
+        },
+        baixo:{
+            titulo:"Apresentou inseguranças e não demonstrou domínio ao explicar",
+            frases:["O professor apresentou dificuldades na explicação do conteúdo, demonstrando insegurança ao longo da aula.","As explicações foram superficiais e pouco claras para os alunos.","Demonstrou insegurança ao responder dúvidas, não conseguindo esclarecer adequadamente.","Não conseguiu organizar a explicação de forma compreensível.","Houve erros conceituais durante a explicação.","O professor demonstrou dificuldade em exemplificar o conteúdo.","As respostas às dúvidas foram imprecisas ou incompletas.","Não conseguiu adaptar a explicação diante das dificuldades dos alunos.","A condução da explicação foi confusa e pouco estruturada.","Demonstrou falta de domínio do conteúdo trabalhado.","Evitou responder questionamentos mais complexos.","As explicações não favoreceram a compreensão da turma.","Não houve aprofundamento ou exploração dos conceitos.","O professor apresentou insegurança ao longo de toda a aula.","As explicações foram desconectadas e pouco coerentes.","Não utilizou exemplos para facilitar a compreensão.","Houve dificuldade em manter a clareza durante a explicação.","O docente não conseguiu retomar ou esclarecer conceitos básicos.","As intervenções foram insuficientes para apoiar a aprendizagem.","A explicação não contribuiu para o avanço dos alunos no conteúdo."]
+        }
+    }
+},
+{
+    titulo:"Como o professor verificou se os estudantes estavam aprendendo?:",
+    banco:{
+        alto:{
+            titulo:"Verificou com estratégias diversificadas como perguntas, pedidos para que os estudantes explicassem determinado conceito por escrito, verbalmente ou conversando com o colega e circulando pela sala para verificar andamento de atividades.",
+            frases:["O professor utilizou perguntas direcionadas ao longo da aula, solicitando que os alunos explicassem os conceitos com suas próprias palavras.","Durante a atividade, circulou pela sala, observando as produções e intervindo quando necessário.","Propôs momentos em que os alunos deveriam explicar oralmente o que estavam aprendendo.","Solicitou registros escritos para verificar a compreensão dos conteúdos.","Incentivou a troca entre os alunos, acompanhando as discussões em duplas ou grupos.","Utilizou perguntas diagnósticas para avaliar o nível de compreensão da turma.","Durante a correção, pediu que os alunos justificassem suas respostas.","Fez intervenções individuais ao identificar dificuldades específicas.","Utilizou diferentes estratégias (oral, escrita e prática) para verificar a aprendizagem.","Observou atentamente o desenvolvimento das atividades, ajustando a condução da aula.","Promoveu momentos de socialização das respostas para validar a aprendizagem.","Solicitou que os alunos resolvessem exercícios no quadro explicando o raciocínio.","Utilizou perguntas abertas que exigiam elaboração por parte dos alunos.","Monitorou constantemente o andamento das atividades.","Incentivou a autoavaliação dos alunos sobre o que aprenderam.","Retomou pontos de dificuldade identificados durante a aula.","Estimulou a argumentação dos alunos durante a resolução das atividades.","Utilizou erros como oportunidade de aprendizagem.","Diversificou as formas de verificação da aprendizagem ao longo da aula.","Demonstrou acompanhamento contínuo do processo de aprendizagem da turma."]
+        },
+        nao_observado:{
+            titulo:"Não foi possível observar",
+            frases:["Não foi possível identificar momentos claros de verificação da aprendizagem durante o período observado.","O recorte da aula não permitiu observar estratégias de acompanhamento da compreensão dos alunos.","A observação ocorreu em um momento que não contemplou a verificação da aprendizagem.","Não houve evidências suficientes para avaliar essa dimensão.","A etapa observada não incluiu momentos de interação avaliativa.","O tempo de observação foi insuficiente para identificar práticas de verificação.","A dinâmica da aula no momento observado não favoreceu essa análise.","Não foi possível acompanhar o desenvolvimento completo da atividade.","A ausência de momentos de checagem pode estar relacionada ao recorte observado.","Não houve elementos suficientes para inferir a prática do professor nesse aspecto.","A observação não contemplou momentos de interação com os alunos.","Não foi possível verificar intervenções do docente nesse sentido.","O foco da aula no momento observado era outro.","Não houve tempo hábil para observar essa prática.","A análise ficou prejudicada pela limitação do tempo de observação.","Não foram identificados registros ou evidências desse processo.","O momento observado não incluiu atividades avaliativas.","Não foi possível acompanhar a correção ou devolutiva das atividades.","A aula observada não contemplou essa dimensão de forma evidente.","Não há dados suficientes para avaliar esse critério."]
+        }
+    }
+},
+{
+    titulo:"A partir do que observou nos estudantes, o professor:",
+    banco:{
+        alto:{
+            titulo:"Ajustou o ritmo da aula, tomando, por exemplo, mais ou menos tempo em atividades ou retomando explicações para estudantes que demonstraram dificuldades.",
+            frases:["O professor ajustou o tempo das atividades ao perceber dificuldades, dedicando mais tempo à explicação dos conceitos.","Ao identificar dúvidas recorrentes, retomou a explicação utilizando uma abordagem diferente.","Adaptou o ritmo da aula, reduzindo a velocidade para garantir a compreensão da turma.","Propôs novos exemplos após perceber que os alunos não haviam compreendido plenamente.","Organizou intervenções específicas para alunos com maior dificuldade.","Alterou a estratégia inicial ao perceber baixo engajamento dos estudantes.","Retomou conceitos básicos antes de avançar para conteúdos mais complexos.","Dividiu a atividade em etapas menores para facilitar a compreensão.","Ajustou o planejamento durante a aula, priorizando a aprendizagem dos alunos.","Demonstrou flexibilidade ao modificar a condução da aula conforme as respostas da turma.","Propôs atividades complementares para reforçar a aprendizagem.","Acelerou o ritmo para alunos que demonstraram domínio do conteúdo.","Reorganizou o tempo da aula para atender diferentes necessidades.","Interrompeu a atividade para esclarecer dúvidas coletivas.","Ajustou a linguagem utilizada conforme o nível da turma.","Ofereceu apoio individualizado durante a realização das atividades.","Modificou a dinâmica da aula para aumentar o engajamento.","Retomou explicações ao perceber erros recorrentes.","Priorizou a compreensão em detrimento do cumprimento rígido do planejamento.","Demonstrou sensibilidade às necessidades da turma ao longo da aula."]
+        },
+        medio:{
+            titulo:"Manteve o mesmo ritmo e roteiro, sem ajustes",
+            frases:["O professor realizou verificações pontuais por meio de perguntas genéricas como “entenderam?”, sem aprofundar as respostas.","Utilizou questionamentos amplos, sem direcionamento específico para avaliar a compreensão.","Perguntou à turma de forma geral, sem checar individualmente o entendimento.","As verificações ocorreram de forma superficial, sem evidências concretas de aprendizagem.","O docente não explorou as respostas dos alunos ao realizar perguntas.","Houve tentativa de verificar a aprendizagem, mas com estratégias pouco eficazes.","As perguntas feitas não permitiram identificar dificuldades específicas.","O professor não solicitou justificativas ou explicações dos alunos.","A verificação ficou restrita a momentos pontuais e pouco estruturados.","Não houve aprofundamento nas respostas apresentadas pelos alunos.","As perguntas não exigiam elaboração ou reflexão.","O docente não utilizou diferentes formas de avaliação durante a aula.","A participação dos alunos foi limitada nas verificações.","As respostas dos alunos não foram exploradas pedagogicamente.","O professor não realizou intervenções a partir das respostas obtidas.","A verificação da aprendizagem foi rápida e pouco diagnóstica.","Não houve acompanhamento contínuo da compreensão dos alunos.","As perguntas não permitiram identificar lacunas de aprendizagem.","O docente manteve uma abordagem mais expositiva, com pouca checagem efetiva.","A verificação ocorreu de forma genérica e pouco direcionada."]
+        },
+        nao_observado:{
+            titulo:"Não foi possível observar",
+            frases:["Não foi possível identificar ajustes no ritmo da aula durante o período observado.","O recorte da observação não contemplou momentos que evidenciassem essa prática.","A etapa observada não exigiu adaptações por parte do professor.","Não houve evidências suficientes para avaliar essa dimensão.","O tempo de observação foi insuficiente para identificar ajustes no ritmo.","A aula observada não apresentou situações que demandassem adaptação.","Não foi possível acompanhar o desenvolvimento completo da atividade.","A dinâmica da aula no momento observado não permitiu essa análise.","Não houve elementos claros para inferir a prática do professor.","A observação não contemplou momentos de intervenção pedagógica.","Não foi possível verificar se o professor ajusta o ritmo em outras situações.","O foco da aula no momento observado não evidenciou essa competência.","A análise ficou prejudicada pelo tempo limitado de observação.","Não foram observadas situações de dificuldade que exigissem adaptação.","Não houve tempo hábil para observar possíveis ajustes.","Não foram identificados momentos de reorganização da aula.","A observação não incluiu atividades que demandassem flexibilização.","Não foi possível verificar intervenções relacionadas ao ritmo da aula.","Não há dados suficientes para avaliar esse critério.","A evidência observada não permitiu concluir sobre essa prática."]
+        }
+    }
+}
 ];
 
-/* LÓGICA DO FORMULÁRIO */
-function gerarFormulario() {
-    const container = document.getElementById('formulario');
-    perguntas.forEach((pergunta, idx) => {
-        const section = document.createElement('div');
-        section.className = 'section';
-        
-        let botoesHTML = '';
-        for (let tipo in pergunta.banco) {
-            botoesHTML += `<button class="btn-status no-print" onclick="toggleCategoria(${idx}, '${tipo}', this)">${pergunta.banco[tipo].titulo}</button>`;
-        }
+/* ===============================
+GERAR FORMULÁRIO
+================================= */
 
-        section.innerHTML = `
+function gerarFormulario(){
+    const container = document.getElementById('formulario');
+    container.innerHTML = "";
+
+    perguntas.forEach((pergunta, index) => {
+        const div = document.createElement('div');
+        div.className = 'section';
+
+        div.innerHTML = `
             <h2>${pergunta.titulo}</h2>
-            <div class="status-container">${botoesHTML}</div>
-            <div id="lista-${idx}" class="lista-frases no-print"></div>
-            <div style="margin-top:15px;">
-                <label style="font-size:12px; font-weight:bold; color:#666;">EVIDÊNCIAS E FEEDBACK:</label>
-                <textarea id="texto-${idx}" oninput="syncText(${idx})" placeholder="Selecione as frases acima ou digite aqui..."></textarea>
-                <div id="pdf-view-${idx}" class="pdf-text"></div>
+            <div class="no-print">
+                ${Object.keys(pergunta.banco).map(tipo => `
+                    <div class="btn-status" onclick="selecionarOpcao(${index}, '${tipo}', this)">
+                        ${pergunta.banco[tipo].titulo}
+                    </div>
+                `).join('')}
             </div>
+            <div id="lista-${index}" class="lista-opcoes no-print"></div>
+            <h4>Registro da seção</h4>
+            <textarea id="texto-${index}" oninput="syncText(${index})"></textarea>
+            <div id="print-${index}" class="print-text"></div>
         `;
-        container.appendChild(section);
+        container.appendChild(div);
     });
 }
 
-function toggleCategoria(pIdx, tipo, btn) {
-    const listaDiv = document.getElementById(`lista-${pIdx}`);
+function selecionarOpcao(indice, tipo, botao){
+    const lista = document.getElementById(`lista-${indice}`);
     
-    // Se já estiver ativo, fecha
-    if (btn.classList.contains('active')) {
-        btn.classList.remove('active');
-        listaDiv.innerHTML = "";
+    if(botao.classList.contains('active')){
+        botao.classList.remove('active');
+        lista.innerHTML = "";
         return;
     }
 
-    // Limpa outros botões da mesma seção
-    btn.parentElement.querySelectorAll('.btn-status').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    
-    // Renderiza frases
-    listaDiv.innerHTML = "";
-    perguntas[pIdx].banco[tipo].frases.forEach(frase => {
-        const opt = document.createElement('div');
-        opt.className = 'opcao';
-        opt.innerText = frase;
-        opt.onclick = () => preencherTexto(pIdx, frase, opt);
-        listaDiv.appendChild(opt);
+    botao.parentElement.querySelectorAll('.btn-status').forEach(el => el.classList.remove('active'));
+    botao.classList.add('active');
+    lista.innerHTML = "";
+
+    perguntas[indice].banco[tipo].frases.forEach(frase => {
+        const div = document.createElement('div');
+        div.className = 'opcao';
+        div.innerText = frase;
+        div.onclick = () => adicionarTexto(frase, indice, div);
+        lista.appendChild(div);
     });
 }
 
-function preencherTexto(pIdx, frase, element) {
-    const textarea = document.getElementById(`texto-${pIdx}`);
-    const bullet = `• ${frase}`;
-    
-    if (textarea.value.includes(bullet)) {
-        textarea.value = textarea.value.replace(bullet + '\n', '').replace(bullet, '').trim();
-        element.classList.remove('selecionado');
+function adicionarTexto(frase, indice, elemento){
+    const campo = document.getElementById(`texto-${indice}`);
+    const linha = '• ' + frase;
+
+    if(campo.value.includes(frase)){
+        const linhas = campo.value.split('\n').filter(l => !l.includes(frase));
+        campo.value = linhas.join('\n');
+        elemento.classList.remove('selecionado');
     } else {
-        textarea.value += (textarea.value ? '\n' : '') + bullet;
-        element.classList.add('selecionado');
+        campo.value += (campo.value ? '\n' : '') + linha;
+        elemento.classList.add('selecionado');
     }
-    syncText(pIdx);
+    syncText(indice);
 }
 
-// Sincroniza textarea com a div visível no PDF
 function syncText(idx) {
-    const val = document.getElementById(`texto-${idx}`).value;
-    document.getElementById(`pdf-view-${idx}`).innerText = val;
+    document.getElementById(`print-${idx}`).innerText = document.getElementById(`texto-${idx}`).value;
 }
 
-/* GERAÇÃO DE PDF */
-function gerarPDF() {
-    const element = document.getElementById('conteudo');
-    const professor = document.getElementById('professor').value || "Sem_Nome";
-    const data = document.getElementById('data').value;
+function gerarPDF(){
+    const elemento = document.getElementById('conteudo');
+    const professor = document.getElementById('professor').value || "Professor";
+    const data = document.getElementById('data').value || "data";
 
     const opt = {
-        margin: [10, 10, 10, 10],
-        filename: `Relatorio_Observacao_${professor}_${data}.pdf`,
+        margin: 10,
+        filename: `Relatorio_${professor}_${data}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(element).save();
+    html2pdf().set(opt).from(elemento).save();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('data').valueAsDate = new Date();
     gerarFormulario();
 });
-</script>
 
+</script>
 </body>
 </html>
