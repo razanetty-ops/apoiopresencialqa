@@ -361,3 +361,10 @@ function gerarPDF(){
         })
         .save();
 }
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('data').valueAsDate = new Date();
+    gerarFormulario();
+});
+</script>
+</body>
+</html>
