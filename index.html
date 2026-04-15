@@ -335,7 +335,7 @@ function sincronizar(i) {
     }
 }
 
-async function gerarPDF() {
+function gerarPDF() {
     const professor = document.getElementById('professor').value || 'Docente';
     const dataInput = document.getElementById('data').value;
     const data = dataInput ? dataInput.split('-').reverse().join('/') : '-';
@@ -343,74 +343,95 @@ async function gerarPDF() {
     const componente = document.getElementById('componente').value || '-';
     const turma = document.getElementById('turma').value || '-';
 
-    // Construção do Relatório
-    let relatorioHTML = `
-        <div id="pdf-content" style="padding: 40px; font-family: Arial, sans-serif; color: #000; background: #fff; width: 700px;">
+    let htmlPDF = `
+        <div style="padding: 30px; font-family: Arial, sans-serif; color: #000; line-height: 1.4;">
             <div style="text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px;">
-                <h1 style="margin: 0; font-size: 20px; text-transform: uppercase;">Relatório de Observação de Aula</h1>
+                <h1 style="margin: 0; font-size: 18px; text-transform: uppercase;">Relatório de Observação de Aula</h1>
+                <p style="margin: 5px 0 0; font-size: 11px; color: #444;">Acompanhamento Pedagógico e Gestão de Sala de Aula</p>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; font-size: 12px;">
-                <div><strong>Escola:</strong> ${escola}</div>
-                <div><strong>Data:</strong> ${data}</div>
-                <div><strong>Professor:</strong> ${professor}</div>
-                <div><strong>Turma:</strong> ${turma}</div>
-                <div style="grid-column: span 2;"><strong>Componente:</strong> ${componente}</div>
-            </div>
-            <hr>
+            <table style="width: 100%; margin-bottom: 25px; font-size: 12px; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2; width: 15%;"><strong>Escola:</strong></td>
+                    <td style="padding: 6px; border: 1px solid #ccc; width: 50%;">${escola}</td>
+                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2; width: 10%;"><strong>Data:</strong></td>
+                    <td style="padding: 6px; border: 1px solid #ccc;">${data}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2;"><strong>Professor:</strong></td>
+                    <td style="padding: 6px; border: 1px solid #ccc;">${professor}</td>
+                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2;"><strong>Turma:</strong></td>
+                    <td style="padding: 6px; border: 1px solid #ccc;">${turma}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2;"><strong>Componente:</strong></td>
+                    <td colspan="3" style="padding: 6px; border: 1px solid #ccc;">${componente}</td>
+                </tr>
+            </table>
     `;
 
+    let temConteudo = false;
+
     perguntas.forEach((p, idx) => {
-        const txt = document.getElementById(`texto-${idx}`).value.trim();
-        if (txt) {
-            relatorioHTML += `
-                <div style="margin-top: 20px; page-break-inside: avoid;">
-                    <h2 style="font-size: 14px; text-transform: uppercase; background: #eee; padding: 5px;">${p.titulo}</h2>
-                    <p style="font-size: 12px; white-space: pre-wrap; text-align: justify;">${txt}</p>
+        const campo = document.getElementById(`texto-${idx}`);
+        if (!campo) return;
+
+        const texto = campo.value.trim();
+        
+        if (texto) {
+            temConteudo = true;
+            htmlPDF += `
+                <div style="margin-bottom: 20px; page-break-inside: avoid;">
+                    <h2 style="font-size: 13px; color: #1a1a1a; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase;">
+                        ${p.titulo}
+                    </h2>
+                    <div style="font-size: 11px; text-align: justify; white-space: pre-wrap; padding-left: 5px;">
+                        ${texto}
+                    </div>
                 </div>
             `;
         }
     });
 
-    relatorioHTML += `
+    if (!temConteudo) {
+        htmlPDF += `
+            <div style="margin-top:20px; font-size:12px; text-align:center;">
+                Nenhuma informação foi preenchida no relatório.
+            </div>
+        `;
+    }
+
+    htmlPDF += `
             <div style="margin-top: 50px; text-align: center; font-size: 10px;">
-                <div style="display: flex; justify-content: space-around; margin-top: 40px;">
-                    <div style="border-top: 1px solid #000; width: 200px;">Assinatura do Observador</div>
-                    <div style="border-top: 1px solid #000; width: 200px;">Assinatura do Professor</div>
+                <p>Documento gerado digitalmente em: ${new Date().toLocaleString('pt-BR')}</p>
+                <div style="margin-top: 60px; display: flex; justify-content: space-around;">
+                    <div style="border-top: 1px solid #000; width: 200px; padding-top: 5px;">Assinatura do Observador</div>
+                    <div style="border-top: 1px solid #000; width: 200px; padding-top: 5px;">Assinatura do Professor</div>
                 </div>
             </div>
         </div>
     `;
 
-    // Criar e injetar o elemento no DOM para que o html2pdf o "veja"
-    const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'fixed';
-    tempContainer.style.top = '0';
-    tempContainer.style.left = '-10000px'; // Fora da tela mas no DOM
-    tempContainer.innerHTML = relatorioHTML;
-    document.body.appendChild(tempContainer);
+    const elementoTemporario = document.createElement('div');
+    elementoTemporario.innerHTML = htmlPDF;
 
-    const opt = {
-        margin: 10,
-        filename: `Observacao_${professor.replace(/\s+/g, '_')}.pdf`,
+    const configuracao = {
+        margin: [10, 10, 10, 10],
+        filename: `Observacao_${professor.replace(/\s+/g, '_')}_${data.replace(/\//g, '-')}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // Aguarda 500ms para garantir que o browser desenhou o texto
-    setTimeout(() => {
-        html2pdf().set(opt).from(tempContainer).save().then(() => {
-            document.body.removeChild(tempContainer);
-        });
-    }, 500);
+    html2pdf().set(configuracao).from(elementoTemporario).save();
 }
 
+
+// 🔥 CORREÇÃO FINAL (AQUI ESTAVA O ERRO)
 document.addEventListener("DOMContentLoaded", () => {
-    const d = document.getElementById('data');
-    if (d) d.value = new Date().toISOString().split('T')[0];
-    gerarFormulario();
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('data').value = hoje;
+
+    // FUNÇÃO CORRETA
+    iniciarFormulario();
 });
-</script>
-</body>
-</html>
