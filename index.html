@@ -266,149 +266,87 @@ let opcaoAberta = null;
 
 // Substitua a partir daqui até o final do seu arquivo
 // 1. FUNÇÃO QUE CRIA O FORMULÁRIO (Certifique-se que o nome é este)
-function gerarFormulario() {
-    const form = document.getElementById('formulario');
-    if (!form) return;
-    
-    form.innerHTML = ""; 
-    perguntas.forEach((p, i) => {
-        let secao = `
-            <div class="section" id="sec-${i}">
-                <h2>${p.titulo}</h2>
-                <div class="no-print" id="botoes-${i}">
-        `;
-        
-        for (let op in p.banco) {
-            secao += `<button class="btn-status" id="btn-${i}-${op}" onclick="toggleOpcao(${i}, '${op}')">${p.banco[op].titulo}</button>`;
-        }
-
-        secao += `
-                </div>
-                <div id="lista-${i}" class="lista-opcoes no-print" style="display:none;"></div>
-                <textarea id="texto-${i}" class="no-print" placeholder="Escreva ou selecione frases..." oninput="sincronizar(${i})"></textarea>
-                <div id="print-${i}" class="print-text"></div>
-            </div>
-        `;
-        form.innerHTML += secao;
-    });
-}
-
-function toggleOpcao(pIndex, opKey) {
-    const lista = document.getElementById(`lista-${pIndex}`);
-    const idUnico = `${pIndex}-${opKey}`;
-    const botoes = document.querySelectorAll(`#botoes-${pIndex} .btn-status`);
-    
-    botoes.forEach(btn => btn.classList.remove('active'));
-    
-    if (opcaoAberta === idUnico) {
-        lista.style.display = "none";
-        opcaoAberta = null;
-        return;
-    }
-
-    const btnAtivo = document.getElementById(`btn-${pIndex}-${opKey}`);
-    if (btnAtivo) btnAtivo.classList.add('active');
-    
-    lista.innerHTML = "";
-    lista.style.display = "flex";
-    opcaoAberta = idUnico;
-
-    perguntas[pIndex].banco[opKey].frases.forEach(f => {
-        const d = document.createElement('div');
-        d.className = 'opcao';
-        d.innerText = f;
-        d.onclick = () => {
-            const area = document.getElementById(`texto-${pIndex}`);
-            area.value += (area.value ? "\n" : "") + f;
-            sincronizar(pIndex);
-        };
-        lista.appendChild(d);
-    });
-}
-
-function sincronizar(i) {
-    const val = document.getElementById(`texto-${i}`).value;
-    const printDiv = document.getElementById(`print-${i}`);
-    if (printDiv) {
-        printDiv.innerText = val;
-        printDiv.style.display = val.trim() === "" ? "none" : "block";
-    }
-}
-
 <script>
 
+// 🔁 GARANTE QUE O FORMULÁRIO SEMPRE CARREGUE
+function iniciarFormularioSeguro() {
+    try {
+        if (typeof iniciarFormulario === "function") {
+            iniciarFormulario();
+        } else {
+            console.error("Função iniciarFormulario não encontrada");
+        }
+    } catch (e) {
+        console.error("Erro ao montar formulário:", e);
+    }
+}
+
+
+// 📄 GERAR PDF
 function gerarPDF() {
     const professor = document.getElementById('professor').value || 'Docente';
     const dataInput = document.getElementById('data').value;
     const data = dataInput ? dataInput.split('-').reverse().join('/') : '-';
-    const escola = document.getElementById('escola').value || '-';
-    const componente = document.getElementById('componente').value || '-';
-    const turma = document.getElementById('turma').value || '-';
 
     let htmlPDF = `
-        <div style="padding: 30px; font-family: Arial, sans-serif;">
-            <h1 style="text-align:center;">Relatório de Observação de Aula</h1>
-
-            <p><strong>Escola:</strong> ${escola}</p>
-            <p><strong>Data:</strong> ${data}</p>
+        <div style="padding:20px; font-family:Arial;">
+            <h1>Relatório de Observação de Aula</h1>
             <p><strong>Professor:</strong> ${professor}</p>
-            <p><strong>Turma:</strong> ${turma}</p>
-            <p><strong>Componente:</strong> ${componente}</p>
+            <p><strong>Data:</strong> ${data}</p>
             <hr>
     `;
 
     let temConteudo = false;
 
-    perguntas.forEach((p, idx) => {
-        const campo = document.getElementById(`texto-${idx}`);
-        if (!campo) return;
+    if (typeof perguntas !== "undefined") {
+        perguntas.forEach((p, idx) => {
+            const campo = document.getElementById(`texto-${idx}`);
+            if (!campo) return;
 
-        const texto = campo.value.trim();
+            const texto = campo.value.trim();
 
-        if (texto) {
-            temConteudo = true;
-            htmlPDF += `
-                <h3>${p.titulo}</h3>
-                <p style="white-space: pre-wrap;">${texto}</p>
-            `;
-        }
-    });
-
-    if (!temConteudo) {
-        htmlPDF += `<p><em>Nenhuma informação foi preenchida no relatório.</em></p>`;
+            if (texto) {
+                temConteudo = true;
+                htmlPDF += `<h3>${p.titulo}</h3><p>${texto}</p>`;
+            }
+        });
     }
 
-    htmlPDF += `
-        <br><br>
-        <p style="text-align:center; font-size:10px;">
-            Gerado em: ${new Date().toLocaleString('pt-BR')}
-        </p>
-        </div>
-    `;
+    if (!temConteudo) {
+        htmlPDF += `<p><em>Nenhum conteúdo preenchido.</em></p>`;
+    }
 
-    const elementoTemporario = document.createElement('div');
-    elementoTemporario.innerHTML = htmlPDF;
+    htmlPDF += `</div>`;
 
-    html2pdf().from(elementoTemporario).save(`Relatorio_${professor}.pdf`);
+    const div = document.createElement('div');
+    div.innerHTML = htmlPDF;
+
+    html2pdf().from(div).save(`Relatorio_${professor}.pdf`);
 }
 
 
-// ✅ INICIALIZAÇÃO CORRETA
+// 🚀 INICIALIZAÇÃO FORÇADA
 document.addEventListener("DOMContentLoaded", () => {
-    try {
-        const hoje = new Date().toISOString().split('T')[0];
-        const campoData = document.getElementById('data');
-        if (campoData) campoData.value = hoje;
 
-        if (typeof iniciarFormulario === "function") {
-            iniciarFormulario();
-        } else {
-            console.error("Função iniciarFormulario não encontrada!");
-        }
+    console.log("Página carregada");
 
-    } catch (erro) {
-        console.error("Erro ao iniciar:", erro);
+    // seta data
+    const campoData = document.getElementById('data');
+    if (campoData) {
+        campoData.value = new Date().toISOString().split('T')[0];
     }
+
+    // tenta iniciar
+    iniciarFormularioSeguro();
+
+    // fallback (caso algo impeça)
+    setTimeout(() => {
+        const form = document.getElementById('formulario');
+        if (form && form.innerHTML.trim() === "") {
+            console.warn("Formulário não carregou, tentando novamente...");
+            iniciarFormularioSeguro();
+        }
+    }, 500);
 });
 
 </script>
