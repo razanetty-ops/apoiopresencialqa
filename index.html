@@ -296,9 +296,8 @@ function gerarFormulario() {
 function toggleOpcao(pIndex, opKey) {
     const lista = document.getElementById(`lista-${pIndex}`);
     const idUnico = `${pIndex}-${opKey}`;
-
-    // Gerenciar estado visual dos botões
     const botoes = document.querySelectorAll(`#botoes-${pIndex} .btn-status`);
+    
     botoes.forEach(btn => btn.classList.remove('active'));
     
     if (opcaoAberta === idUnico) {
@@ -307,8 +306,8 @@ function toggleOpcao(pIndex, opKey) {
         return;
     }
 
-    const btnSelecionado = document.getElementById(`btn-${pIndex}-${opKey}`);
-    if (btnSelecionado) btnSelecionado.classList.add('active');
+    const btnAtivo = document.getElementById(`btn-${pIndex}-${opKey}`);
+    if (btnAtivo) btnAtivo.classList.add('active');
     
     lista.innerHTML = "";
     lista.style.display = "flex";
@@ -344,83 +343,90 @@ function gerarPDF() {
     const componente = document.getElementById('componente').value || '-';
     const turma = document.getElementById('turma').value || '-';
 
-    // Construção de um HTML limpo para o PDF evitar páginas em branco
-    let htmlPDF = `
-        <div style="padding: 30px; font-family: Arial, sans-serif; color: #000;">
-            <div style="text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px;">
-                <h1 style="margin: 0; font-size: 18px; text-transform: uppercase;">Relatório de Observação de Aula</h1>
-                <p style="margin: 5px 0 0; font-size: 11px;">Acompanhamento Pedagógico</p>
+    // Construção do HTML do Relatório
+    let conteudoHTML = `
+        <div style="padding: 40px; font-family: Arial, sans-serif; color: #000; background: #fff;">
+            <div style="text-align: center; border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
+                <h1 style="margin: 0; font-size: 22px; text-transform: uppercase;">Relatório de Observação de Aula</h1>
+                <p style="margin: 5px 0 0; font-size: 12px; color: #555;">Documento de Apoio Pedagógico</p>
             </div>
 
-            <table style="width: 100%; margin-bottom: 25px; font-size: 12px; border-collapse: collapse;">
+            <table style="width: 100%; margin-bottom: 30px; font-size: 13px; border-collapse: collapse;">
                 <tr>
-                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2; width: 15%;"><strong>Escola:</strong></td>
-                    <td style="padding: 6px; border: 1px solid #ccc; width: 50%;">${escola}</td>
-                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2; width: 10%;"><strong>Data:</strong></td>
-                    <td style="padding: 6px; border: 1px solid #ccc;">${data}</td>
+                    <td style="padding: 8px; border: 1px solid #ccc; background: #f9f9f9;"><strong>Escola:</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">${escola}</td>
+                    <td style="padding: 8px; border: 1px solid #ccc; background: #f9f9f9;"><strong>Data:</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">${data}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2;"><strong>Professor:</strong></td>
-                    <td style="padding: 6px; border: 1px solid #ccc;">${professor}</td>
-                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2;"><strong>Turma:</strong></td>
-                    <td style="padding: 6px; border: 1px solid #ccc;">${turma}</td>
+                    <td style="padding: 8px; border: 1px solid #ccc; background: #f9f9f9;"><strong>Professor:</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">${professor}</td>
+                    <td style="padding: 8px; border: 1px solid #ccc; background: #f9f9f9;"><strong>Turma:</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">${turma}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2;"><strong>Componente:</strong></td>
-                    <td colspan="3" style="padding: 6px; border: 1px solid #ccc;">${componente}</td>
+                    <td style="padding: 8px; border: 1px solid #ccc; background: #f9f9f9;"><strong>Componente:</strong></td>
+                    <td colspan="3" style="padding: 8px; border: 1px solid #ccc;">${componente}</td>
                 </tr>
             </table>
     `;
 
     perguntas.forEach((p, idx) => {
-        const campoTexto = document.getElementById(`texto-${idx}`);
-        const texto = campoTexto ? campoTexto.value.trim() : "";
+        const areaTexto = document.getElementById(`texto-${idx}`);
+        const textoOriginal = areaTexto ? areaTexto.value.trim() : "";
         
-        if (texto) {
-            htmlPDF += `
-                <div style="margin-bottom: 20px; page-break-inside: avoid;">
-                    <h2 style="font-size: 13px; border-bottom: 1px solid #eee; padding-bottom: 4px; text-transform: uppercase;">
+        if (textoOriginal) {
+            // Converte quebras de linha em <br> para o PDF entender
+            const textoFormatado = textoOriginal.replace(/\n/g, '<br>');
+            conteudoHTML += `
+                <div style="margin-bottom: 25px; page-break-inside: avoid;">
+                    <h2 style="font-size: 14px; color: #222; border-bottom: 1px solid #ddd; padding-bottom: 5px; text-transform: uppercase; margin-bottom: 10px;">
                         ${p.titulo}
                     </h2>
-                    <div style="font-size: 11px; white-space: pre-wrap;">${texto}</div>
+                    <div style="font-size: 12px; line-height: 1.6; text-align: justify;">${textoFormatado}</div>
                 </div>
             `;
         }
     });
 
-    htmlPDF += `
-            <div style="margin-top: 50px; text-align: center; font-size: 10px;">
-                <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-                <div style="margin-top: 60px; display: flex; justify-content: space-around;">
-                    <div style="border-top: 1px solid #000; width: 200px; padding-top: 5px;">Assinatura do Observador</div>
-                    <div style="border-top: 1px solid #000; width: 200px; padding-top: 5px;">Assinatura do Professor</div>
+    conteudoHTML += `
+            <div style="margin-top: 60px; text-align: center; font-size: 11px;">
+                <p>Emitido em: ${new Date().toLocaleString('pt-BR')}</p>
+                <div style="margin-top: 70px; display: flex; justify-content: space-around;">
+                    <div style="border-top: 1px solid #000; width: 220px; padding-top: 5px;">Assinatura do Observador</div>
+                    <div style="border-top: 1px solid #000; width: 220px; padding-top: 5px;">Assinatura do Professor</div>
                 </div>
             </div>
         </div>
     `;
 
+    // CRÍTICO: Criar elemento oculto no body para o html2pdf capturar corretamente
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlPDF;
+    tempDiv.style.position = 'fixed';
+    tempDiv.style.left = '-9999px';
+    tempDiv.innerHTML = conteudoHTML;
+    document.body.appendChild(tempDiv);
 
     const opt = {
         margin: [10, 10, 10, 10],
-        filename: `Relatorio_${professor.replace(/\s+/g, '_')}.pdf`,
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: 'avoid-all' }
+        filename: `Relatorio_Observacao_${professor.replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(tempDiv).save();
+    // Gera o PDF e remove o elemento temporário depois
+    html2pdf().set(opt).from(tempDiv).save().then(() => {
+        document.body.removeChild(tempDiv);
+    });
 }
 
-// Inicialização segura do formulário
+// Inicialização Final
 document.addEventListener("DOMContentLoaded", () => {
-    const campoData = document.getElementById('data');
-    if (campoData) {
-        campoData.value = new Date().toISOString().split('T')[0];
+    const inputData = document.getElementById('data');
+    if (inputData) {
+        inputData.value = new Date().toISOString().split('T')[0];
     }
-    
-    // Chama a função correta
     gerarFormulario();
 });
 </script>
