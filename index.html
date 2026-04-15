@@ -328,30 +328,94 @@ function sincronizar(i) {
 }
 
 function gerarPDF() {
-    // Sincroniza tudo antes de gerar
-    perguntas.forEach((_, i) => sincronizar(i));
+    const professor = document.getElementById('professor').value || 'Docente';
+    const dataInput = document.getElementById('data').value;
+    const data = dataInput ? dataInput.split('-').reverse().join('/') : '-';
+    const escola = document.getElementById('escola').value || '-';
+    const componente = document.getElementById('componente').value || '-';
+    const turma = document.getElementById('turma').value || '-';
 
-    const element = document.getElementById('conteudo');
-    
-    // Configurações para o documento parecer um relatório oficial
-    const opt = {
-        margin: [15, 15, 15, 15],
-        filename: `Relatorio_Observacao_${document.getElementById('professor').value || 'Aula'}.pdf`,
+    // Construção de um HTML exclusivo para o PDF (estilo relatório oficial)
+    let htmlPDF = `
+        <div style="padding: 30px; font-family: Arial, sans-serif; color: #000; line-height: 1.4;">
+            <div style="text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px;">
+                <h1 style="margin: 0; font-size: 18px; text-transform: uppercase;">Relatório de Observação de Aula</h1>
+                <p style="margin: 5px 0 0; font-size: 11px; color: #444;">Acompanhamento Pedagógico e Gestão de Sala de Aula</p>
+            </div>
+
+            <table style="width: 100%; margin-bottom: 25px; font-size: 12px; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2; width: 15%;"><strong>Escola:</strong></td>
+                    <td style="padding: 6px; border: 1px solid #ccc; width: 50%;">${escola}</td>
+                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2; width: 10%;"><strong>Data:</strong></td>
+                    <td style="padding: 6px; border: 1px solid #ccc;">${data}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2;"><strong>Professor:</strong></td>
+                    <td style="padding: 6px; border: 1px solid #ccc;">${professor}</td>
+                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2;"><strong>Turma:</strong></td>
+                    <td style="padding: 6px; border: 1px solid #ccc;">${turma}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px; border: 1px solid #ccc; background: #f2f2f2;"><strong>Componente:</strong></td>
+                    <td colspan="3" style="padding: 6px; border: 1px solid #ccc;">${componente}</td>
+                </tr>
+            </table>
+    `;
+
+    // Percorre as perguntas e adiciona ao PDF apenas o que foi preenchido
+    perguntas.forEach((p, idx) => {
+        const texto = document.getElementById(`texto-${idx}`).value.trim();
+        
+        if (texto) {
+            htmlPDF += `
+                <div style="margin-bottom: 20px; page-break-inside: avoid;">
+                    <h2 style="font-size: 13px; color: #1a1a1a; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase;">
+                        ${p.titulo}
+                    </h2>
+                    <div style="font-size: 11px; text-align: justify; white-space: pre-wrap; padding-left: 5px;">${texto}</div>
+                </div>
+            `;
+        }
+    });
+
+    // Rodapé com data de emissão e espaço para assinatura
+    htmlPDF += `
+            <div style="margin-top: 50px; text-align: center; font-size: 10px;">
+                <p>Documento gerado digitalmente em: ${new Date().toLocaleString('pt-BR')}</p>
+                <div style="margin-top: 60px; display: flex; justify-content: space-around;">
+                    <div style="border-top: 1px solid #000; width: 200px; padding-top: 5px;">Assinatura do Observador</div>
+                    <div style="border-top: 1px solid #000; width: 200px; padding-top: 5px;">Assinatura do Professor</div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const elementoTemporario = document.createElement('div');
+    elementoTemporario.innerHTML = htmlPDF;
+
+    const configuracao = {
+        margin: [10, 10, 10, 10],
+        filename: `Observacao_${professor.replace(/\s+/g, '_')}_${data.replace(/\//g, '-')}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-            scale: 2, 
-            useCORS: true,
-            logging: false
-        },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        pagebreak: { mode: 'avoid-all' }
     };
 
-    // Gera o PDF
-    html2pdf().set(opt).from(element).save();
+    // Gera o arquivo
+    html2pdf().set(configuracao).from(elementoTemporario).save();
 }
 
-window.onload = iniciarFormulario;
+// Inicialização do formulário ao carregar a página
+document.addEventListener("DOMContentLoaded", () => {
+    // Define a data de hoje como padrão no input
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('data').value = hoje;
+    
+    // Constrói os campos do formulário
+    gerarFormulario();
+});
 </script>
 </body>
 </html>
