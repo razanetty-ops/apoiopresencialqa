@@ -262,147 +262,76 @@ const perguntas = [
         }
     }
 ]
-function gerarFormulario(){
-    const container = document.getElementById('formulario');
-    container.innerHTML = "";
-    perguntas.forEach((p, pIdx) => {
-        const div = document.createElement('div');
-        div.className = 'section';
-        div.innerHTML = `
-            <h2>${p.titulo}</h2>
-            <div class="no-print" style="display:flex; justify-content: space-between;">
-                ${Object.keys(p.banco).map(chave => `
-                    <div class="btn-status" onclick="alternarOpcoes(${pIdx}, '${chave}', this)">
-                        ${p.banco[chave].titulo}
-                    </div>
-                `).join('')}
-            </div>
-            <div id="lista-${pIdx}" class="lista-opcoes no-print"></div>
-            <h4>Registro / Evidências:</h4>
-            <textarea id="texto-${pIdx}" oninput="syncText(${pIdx})"></textarea>
-            <div id="print-${pIdx}" class="print-text"></div>
+function iniciarFormulario() {
+    const form = document.getElementById('formulario');
+    perguntas.forEach((p, i) => {
+        let secao = `
+            <div class="section" id="sec-${i}">
+                <h2>${p.titulo}</h2>
+                ${p.subtitulo ? `<p style="font-style:italic; color: #666;">${p.subtitulo}</p>` : ''}
+                <div class="no-print">
         `;
-        container.appendChild(div);
-    });
-}
-
-function alternarOpcoes(pIdx, chave, botao){
-    const lista = document.getElementById(`lista-${pIdx}`);
-    if(botao.classList.contains('active')){
-        botao.classList.remove('active');
-        lista.innerHTML = "";
-        return;
-    }
-    botao.parentElement.querySelectorAll('.btn-status').forEach(b => b.classList.remove('active'));
-    botao.classList.add('active');
-    lista.innerHTML = "";
-    perguntas[pIdx].banco[chave].frases.forEach(frase => {
-        const item = document.createElement('div');
-        item.className = 'opcao';
-        item.innerText = frase;
-        item.onclick = () => {
-            const campo = document.getElementById(`texto-${pIdx}`);
-            const linha = "• " + frase;
-            if(campo.value.includes(frase)){
-                campo.value = campo.value.split('\n').filter(l => !l.includes(frase)).join('\n');
-                item.classList.remove('selecionado');
-            } else {
-                campo.value += (campo.value ? '\n' : '') + linha;
-                item.classList.add('selecionado');
-            }
-            syncText(pIdx);
-        };
-        lista.appendChild(item);
-    });
-}
-
-function syncText(idx) {
-    document.getElementById(`print-${idx}`).innerText = document.getElementById(`texto-${idx}`).value;
-}
-
-function gerarPDF(){
-    const conteudo = document.getElementById('conteudo');
-
-    // Clonar conteúdo para não mexer no original
-    const clone = conteudo.cloneNode(true);
-
-    // Montar relatório formatado
-    let relatorio = `
-        <div style="font-family: Arial; font-size: 12px; line-height: 1.5;">
-            <h1 style="text-align:center;">RELATÓRIO DE OBSERVAÇÃO DE AULA</h1>
-            <hr>
-    `;
-
-    // Cabeçalho
-    const data = document.getElementById('data').value;
-    const escola = document.getElementById('escola').value;
-    const professor = document.getElementById('professor').value;
-    const componente = document.getElementById('componente').value;
-    const turma = document.getElementById('turma').value;
-
-    relatorio += `
-        <p><strong>Data:</strong> ${data || '-'}</p>
-        <p><strong>Escola:</strong> ${escola || '-'}</p>
-        <p><strong>Professor:</strong> ${professor || '-'}</p>
-        <p><strong>Componente:</strong> ${componente || '-'}</p>
-        <p><strong>Turma:</strong> ${turma || '-'}</p>
-        <hr>
-    `;
-
-    // Seções
-    perguntas.forEach((p, idx) => {
-        const texto = document.getElementById(`texto-${idx}`).value;
-
-        if(texto.trim()){
-            relatorio += `
-                <h2 style="font-size:14px; margin-top:15px;">${p.titulo}</h2>
-                <p style="text-align:justify;">
-                    ${texto.replace(/\n/g, '<br>')}
-                </p>
-            `;
+        
+        for (let op in p.banco) {
+            secao += `<button class="btn-status" onclick="selecionarOpcao(${i}, '${op}')">${p.banco[op].titulo}</button>`;
         }
+
+        secao += `
+                </div>
+                <div id="lista-${i}" class="lista-opcoes no-print"></div>
+                <textarea id="texto-${i}" oninput="sincronizar(${i})"></textarea>
+                <div id="print-${i}" class="print-text"></div>
+            </div>
+        `;
+        form.innerHTML += secao;
     });
+}
 
-    relatorio += `</div>`;
+function selecionarOpcao(pIndex, opKey) {
+    const lista = document.getElementById(`lista-${pIndex}`);
+    lista.innerHTML = "";
+    
+    // Estilo do botão ativo
+    const botoes = document.querySelectorAll(`#sec-${pIndex} .btn-status`);
+    botoes.forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
 
-    // Criar container temporário
-    const temp = document.createElement('div');
-    temp.innerHTML = relatorio;
+    perguntas[pIndex].banco[opKey].frases.forEach(f => {
+        const d = document.createElement('div');
+        d.className = 'opcao';
+        d.innerText = f;
+        d.onclick = () => {
+            const area = document.getElementById(`texto-${pIndex}`);
+            area.value += (area.value ? "\n" : "") + f;
+            sincronizar(pIndex);
+        };
+        lista.appendChild(d);
+    });
+}
+
+function sincronizar(i) {
+    document.getElementById(`print-${i}`).innerText = document.getElementById(`texto-${i}`).value;
+}
+
+function gerarPDF() {
+    const element = document.getElementById('conteudo');
+    
+    // Garante que todos os textos apareçam no PDF
+    perguntas.forEach((_, i) => sincronizar(i));
 
     const opt = {
-        margin: [10, 10, 10, 10],
-        filename: `Relatorio_${professor || 'Docente'}.pdf`,
-        image: { type: 'jpeg', quality: 0.95 },
+        margin: 10,
+        filename: 'Relatorio_Observacao.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
-        jsPDF: { 
-            unit: 'mm', 
-            format: 'a4', 
-            orientation: 'portrait'
-        },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: 'avoid-all' }
     };
 
-    html2pdf()
-        .set(opt)
-        .from(temp)
-        .toPdf()
-        .get('pdf')
-        .then(pdf => {
-            const totalPages = pdf.internal.getNumberOfPages();
-
-            // 🔥 Limitar a 2 páginas
-            if (totalPages > 2) {
-                for (let i = totalPages; i > 2; i--) {
-                    pdf.deletePage(i);
-                }
-            }
-        })
-        .save();
+    html2pdf().set(opt).from(element).save();
 }
-document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById('data').valueAsDate = new Date();
-    gerarFormulario();
-});
+
+window.onload = iniciarFormulario;
 </script>
 </body>
 </html>
